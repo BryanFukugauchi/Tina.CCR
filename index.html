@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCR na APS - Triagem e Rastreamento</title>
+    <style>
+        :root {
+            --primary: #1E3A8A;
+            --primary-light: #3B82F6;
+            --bg-main: #F8FAFC;
+            --text-dark: #1E293B;
+            --text-muted: #64748B;
+            --card-border: #E2E8F0;
+            --alert-red-bg: #FEF2F2;
+            --alert-red-border: #EF4444;
+            --alert-yellow-bg: #FEF3C7;
+            --alert-yellow-border: #F59E0B;
+            --success-green-bg: #ECFDF5;
+            --success-green-border: #10B981;
+            --info-blue-bg: #EFF6FF;
+            --info-blue-border: #3B82F6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            background-color: #0F172A;
+            color: white;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 20px;
+            color: #38BDF8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar p {
+            font-size: 13px;
+            color: #94A3B8;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: #CBD5E1;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background-color: #1E293B;
+            color: #38BDF8;
+            font-weight: 600;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 32px;
+            max-width: 1200px;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 10px;
+            margin-bottom: 24px;
+        }
+
+        /* Cards & Grids */
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background-color: white;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .metric-card h4 {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .metric-card .value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .metric-card .subtext {
+            font-size: 12px;
+            color: #059669;
+            font-weight: 500;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .info-box {
+            background-color: white;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .info-box h3 {
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 12px;
+            border-bottom: 1px solid #F1F5F9;
+            padding-bottom: 8px;
+        }
+
+        .info-box ul {
+            padding-left: 18px;
+            line-height: 1.6;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        /* Form Controls */
+        .form-section {
+            background-color: white;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-section h3 {
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #F8FAFC;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .checkbox-label input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary-light);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* Decision Cards */
+        .card-result {
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 6px solid;
+            line-height: 1.6;
+        }
+
+        .card-result h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-red {
+            background-color: var(--alert-red-bg);
+            border-color: var(--alert-red-border);
+            color: #991B1B;
+        }
+
+        .card-yellow {
+            background-color: var(--alert-yellow-bg);
+            border-color: var(--alert-yellow-border);
+            color: #92400E;
+        }
+
+        .card-green {
+            background-color: var(--success-green-bg);
+            border-color: var(--success-green-border);
+            color: #065F46;
+        }
+
+        .card-blue {
+            background-color: var(--info-blue-bg);
+            border-color: var(--info-blue-border);
+            color: #1E40AF;
+        }
+
+        /* Table Style */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            margin-top: 16px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .data-table th {
+            background-color: #F1F5F9;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { margin-left: 0; padding: 16px; }
+            .content-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>🩺 CCR na APS</h2>
+        <p>Apoio à Decisão da Enfermagem</p>
+        <hr style="border-color: #334155;">
+        <div class="nav-menu">
+            <button class="nav-btn active" onclick="switchTab('dashboard')">📊 Dashboard & Contexto</button>
+            <button class="nav-btn" onclick="switchTab('triagem')">📋 Triagem de Sintomas</button>
+            <button class="nav-btn" onclick="switchTab('risco')">🧮 Avaliação de Risco</button>
+            <button class="nav-btn" onclick="switchTab('sof')">🧪 Sangue Oculto (SOF)</button>
+            <button class="nav-btn" onclick="switchTab('arvore')">🗺️ Árvore de Decisão</button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+
+        <!-- TAB 1: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-panel active">
+            <div class="header-title">Câncer Colorretal (CCR): Painel de Decisão na APS</div>
+            <p style="margin-bottom: 20px; font-size: 14px; color: var(--text-muted);">
+                Ferramenta desenvolvida para subsidiar a <strong>equipe de enfermagem da Atenção Primária à Saúde (APS)</strong> na consulta privativa do enfermeiro, acolhimento inicial e busca ativa na UBS.
+            </p>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h4>Estimativa Anual (Brasil)</h4>
+                    <div class="value">53.810</div>
+                    <div class="subtext">10,4% do total de cânceres</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Taxa de Incidência</h4>
+                    <div class="value">25,11 / 100k</div>
+                    <div class="subtext">Triênio 2026-2028 (INCA)</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Diagnóstico Tardio</h4>
+                    <div class="value">55% a 70%</div>
+                    <div class="subtext">Estágios avançados no BR</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Mortalidade Inicial</h4>
+                    <div class="value">8,5%</div>
+                    <div class="subtext">Baixa no estágio precoce</div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="info-box">
+                    <h3>📌 Papel Estratégico da APS e da Enfermagem</h3>
+                    <ul>
+                        <li><strong>Porta de Entrada do SUS:</strong> A APS organiza e filtra o fluxo dos serviços na rede de saúde.</li>
+                        <li><strong>Consulta Privativa do Enfermeiro:</strong> Espaço essencial para identificar hábitos de vida e estratificar risco.</li>
+                        <li><strong>Busca Ativa na UBS:</strong> Convocação de pessoas assintomáticas elegíveis na população adscrita.</li>
+                        <li><strong>Combate ao Diagnóstico Tardio:</strong> A média de idade ao diagnóstico é de 64 anos. O rastreamento impede a progressão adenoma-carcinoma.</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h3>🧬 Fisiopatologia e Progressão</h3>
+                    <ul>
+                        <li><strong>Origem Mutacional:</strong> Mutações genéticas nas células intestinais provocam crescimento desordenado e formação tumoral.</li>
+                        <li><strong>Evolução do Pólipo:</strong> Desenvolve-se comumente a partir de um pólipo adenomatoso na mucosa intestinal ou retal.</li>
+                        <li><strong>Metástase:</strong> Pelo elevado grau de autonomia, as células tumorais podem migrar para outros órgãos.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: TRIAGEM DE SINTOMAS -->
+        <div id="tab-triagem" class="tab-panel">
+            <div class="header-title">Acolhimento Inicial: Triagem de Pacientes Sintomáticos</div>
+            <p style="margin-bottom: 20px; font-size: 14px; color: var(--text-muted);">
+                Avalie a presença de manifestações clínicas sugestivas de neoplasia intestinal durante a anamnese de enfermagem.
+            </p>
+
+            <div class="form-section">
+                <h3>1. Sintomas Localizados e Gerais (Marque os presentes)</h3>
+                <div class="checkbox-grid">
+                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Afinamento das fezes</label>
+                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Sensação de evacuação incompleta (tenesmo)</label>
+                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Flatulência e/ou cólica abdominal constante</label>
+                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Presença de sangue vivo nas fezes</label>
+                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Sangramento retal frequente</label>
+                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Perda de peso repentina inexplicada</label>
+                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Distensão abdominal inexplicada</label>
+                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Anemia de origem não esclarecida</label>
+                </div>
+            </div>
+
+            <div id="resultado-sintomas">
+                <div class="card-result card-green">
+                    <h4>✅ Paciente Assintomático</h4>
+                    <p>Nenhum sinal de alerta identificado no momento. Prosseguir para a <strong>Avaliação de Risco e Rastreamento</strong>.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: AVALIAÇÃO DE RISCO -->
+        <div id="tab-risco" class="tab-panel">
+            <div class="header-title">Calculadora de Risco e Elegibilidade de Rastreio</div>
+
+            <div class="form-section">
+                <h3>1. Dados Demográficos</h3>
+                <div class="form-group">
+                    <label for="idade-input">Idade do paciente (anos):</label>
+                    <input type="number" id="idade-input" class="form-control" value="52" min="18" max="110" onchange="evalRisco()">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>2. Fatores Hereditários e Condições Clínicas de Alto Risco</h3>
+                <div class="checkbox-grid">
+                    <label class="checkbox-label"><input type="checkbox" class="hereditario-check" onchange="evalRisco()"> Histórico de Polipose Adenomatosa Familiar (FAP)</label>
+                    <label class="checkbox-label"><input type="checkbox" class="hereditario-check" onchange="evalRisco()"> Síndrome de Lynch (CCRRNP)</label>
+                    <label class="checkbox-label"><input type="checkbox" class="hereditario-check" onchange="evalRisco()"> Doença Inflamatória Intestinal (Colite/Crohn)</label>
+                    <label class="checkbox-label"><input type="checkbox" class="hereditario-check" onchange="evalRisco()"> Diabetes Tipo 2</label>
+                    <label class="checkbox-label"><input type="checkbox" class="hereditario-check" onchange="evalRisco()"> Exposição à radiação ionizante prévia</label>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>3. Fatores de Risco Modificáveis / Estilo de Vida</h3>
+                <div class="checkbox-grid">
+                    <label class="checkbox-label"><input type="checkbox"> Alto consumo de carne vermelha ou processada</label>
+                    <label class="checkbox-label"><input type="checkbox"> Consumo frequente de álcool</label>
+                    <label class="checkbox-label"><input type="checkbox"> Alimentação baixa em frutas, fibras e cálcio</label>
+                    <label class="checkbox-label"><input type="checkbox"> Obesidade e inatividade física</label>
+                    <label class="checkbox-label"><input type="checkbox"> Tabagismo prolongado</label>
+                </div>
+            </div>
+
+            <div id="resultado-risco">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- TAB 4: SANGUE OCULTO -->
+        <div id="tab-sof" class="tab-panel">
+            <div class="header-title">Módulo de Avaliação do Teste de Sangue Oculto nas Fezes</div>
+
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="tipo-teste">Selecione o teste realizado:</label>
+                    <select id="tipo-teste" class="form-control" onchange="evalSOF()">
+                        <option value="FIT">FIT (Teste Imunoquímico Fecal) - Preferencial</option>
+                        <option value="g-FOBT">g-FOBT (Teste por Guaiaco) - Alternativa</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="resultado-teste">Resultado do Exame:</label>
+                    <select id="resultado-teste" class="form-control" onchange="evalSOF()">
+                        <option value="negativo">Negativo (-)</option>
+                        <option value="positivo">Positivo (+)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="resultado-sof">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- TAB 5: ÁRVORE DE DECISÃO -->
+        <div id="tab-arvore" class="tab-panel">
+            <div class="header-title">Matriz de Navegação do Cuidado no SUS</div>
+            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">
+                Síntese das etapas operacionais para integração do aplicativo com a regulação municipal da APS:
+            </p>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Etapa</th>
+                        <th>Público-Alvo</th>
+                        <th>Ação da Enfermagem</th>
+                        <th>Destino Regulatório</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Acolhimento</strong></td>
+                        <td>Geral da UBS</td>
+                        <td>Triagem de sintomas (sintomático vs assintomático)</td>
+                        <td>APS / Atenção Secundária</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Sintomáticos</strong></td>
+                        <td>Sangramento, fezes finas, anemia, perda peso</td>
+                        <td>Encaminhamento direto para retossigmoidoscopia/colonoscopia</td>
+                        <td>Atenção Secundária</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Assintomáticos &lt; 50 anos</strong></td>
+                        <td>Sem alto risco hereditário</td>
+                        <td>Promoção da saúde (dieta rica em fibras, atividade física)</td>
+                        <td>Acompanhamento na APS</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4. Alto Risco Hereditário</strong></td>
+                        <td>FAP, Lynch, DII, Diabetes Tipo 2</td>
+                        <td>Encaminhamento especializado direto para gastroenterologia</td>
+                        <td>Atenção Secundária</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5. Elegíveis Rastreio</strong></td>
+                        <td>Assintomáticos ≥ 50 anos</td>
+                        <td>Solicitação de teste FIT (ou g-FOBT)</td>
+                        <td>Laboratório de Análises</td>
+                    </tr>
+                    <tr>
+                        <td><strong>6. FIT/g-FOBT Positivo</strong></td>
+                        <td>Sangue oculto detectado</td>
+                        <td>Regulação para Colonoscopia / Retossigmoidoscopia</td>
+                        <td>Atenção Secundária</td>
+                    </tr>
+                    <tr>
+                        <td><strong>7. Pólipo Ressecado</strong></td>
+                        <td>Achado em colonoscopia</td>
+                        <td>Prevenção da sequência adenoma-carcinoma</td>
+                        <td>Vigilância Endoscópica</td>
+                    </tr>
+                    <tr>
+                        <td><strong>8. CCR Confirmado</strong></td>
+                        <td>Diagnóstico histopatológico</td>
+                        <td>Encaminhamento urgente para oncologia/cirurgia</td>
+                        <td>Atenção Terciária</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById('tab-' + tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function evalSintomas() {
+            const checkboxes = document.querySelectorAll('.sintoma-check');
+            let hasSintoma = false;
+            checkboxes.forEach(cb => { if (cb.checked) hasSintoma = true; });
+
+            const resDiv = document.getElementById('resultado-sintomas');
+            if (hasSintoma) {
+                resDiv.innerHTML = `
+                    <div class="card-result card-red">
+                        <h4>⚠️ ATENÇÃO: PACIENTE SINTOMÁTICO IDENTIFICADO!</h4>
+                        <p><strong>Diretriz Clínica de Conduta Imediata:</strong></p>
+                        <ul>
+                            <li>O paciente <strong>NÃO</strong> deve ser submetido a teste de sangue oculto (FIT/g-FOBT).</li>
+                            <li>Encaminhar para a <strong>Atenção Secundária</strong> para investigação diagnóstica por imagem/endoscopia:
+                                <ul>
+                                    <li><strong>Retossigmoidoscopia:</strong> Avaliação direta do canal anal, reto e sigmóide com biópsia.</li>
+                                    <li><strong>Colonoscopia:</strong> Exame do cólon completo com ressecção de pólipos/lesões.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                resDiv.innerHTML = `
+                    <div class="card-result card-green">
+                        <h4>✅ Paciente Assintomático</h4>
+                        <p>Nenhum sinal de alerta identificado no momento. Prosseguir para a <strong>Avaliação de Risco e Rastreamento</strong>.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function evalRisco() {
+            const idade = parseInt(document.getElementById('idade-input').value) || 0;
+            const hereditarioCbs = document.querySelectorAll('.hereditario-check');
+            let isAltoRisco = false;
+            hereditarioCbs.forEach(cb => { if (cb.checked) isAltoRisco = true; });
+
+            const resDiv = document.getElementById('resultado-risco');
+
+            if (isAltoRisco) {
+                resDiv.innerHTML = `
+                    <div class="card-result card-yellow">
+                        <h4>🚨 PACIENTE DE ALTO RISCO HEREDITÁRIO OU CLÍNICO</h4>
+                        <p><strong>Conduta Recomendada:</strong></p>
+                        <p>Devido a condições genéticas ou inflamatórias crônicas predisponentes, o paciente necessita de acompanhamento especializado.</p>
+                        <p><strong>Encaminhamento direto para Gastroenterologia / Colonoscopia na Atenção Secundária</strong>, independente da idade.</p>
+                    </div>
+                `;
+            } else if (idade < 50) {
+                resDiv.innerHTML = `
+                    <div class="card-result card-blue">
+                        <h4>ℹ️ PACIENTE FORA DA FAIXA ETÁRIA DE RASTREIO DE ROTINA (&lt; 50 ANOS)</h4>
+                        <p><strong>Conduta Recomendada:</strong></p>
+                        <p>Sem indicação de teste de sangue oculto nas fezes de rotina no momento.</p>
+                        <p><strong>Ações de Promoção à Saúde na APS:</strong> Orientações sobre hábitos saudáveis (redução de carne processada, álcool e tabagismo; incentivo ao consumo de fibras, frutas e cálcio; combate ao sedentarismo e obesidade).</p>
+                    </div>
+                `;
+            } else {
+                resDiv.innerHTML = `
+                    <div class="card-result card-green">
+                        <h4>✅ PACIENTE ELEGÍVEL PARA RASTREAMENTO DE ROTINA (Assintomático, Idade ≥ 50 anos)</h4>
+                        <p><strong>Diretriz de Solicitação do Exame:</strong></p>
+                        <ul>
+                            <li><strong>Opção Preferencial: FIT (Teste Imunoquímico Fecal)</strong> - Anticorpo específico contra a porção globina do heme; alta praticidade e sensibilidade; sem restrição alimentar.</li>
+                            <li><strong>Opção Alternativa: g-FOBT (Teste por Guaiaco)</strong> - Indicado na indisponibilidade do FIT; requer preparo alimentar e repetição de coleta.</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        function evalSOF() {
+            const teste = document.getElementById('tipo-teste').value;
+            const res = document.getElementById('resultado-teste').value;
+            const resDiv = document.getElementById('resultado-sof');
+
+            if (res === 'positivo') {
+                resDiv.innerHTML = `
+                    <div class="card-result card-red">
+                        <h4>🚨 RESULTADO POSITIVO PARA SANGUE OCULTO NAS FEZES</h4>
+                        <p><strong>Conduta Imediata de Enfermagem:</strong></p>
+                        <p>Presença de sangramento ativo detectado pelo teste ${teste}.</p>
+                        <p><strong>Encaminhamento obrigatório para a Atenção Secundária</strong> para confirmação endoscópica:</p>
+                        <ul>
+                            <li><strong>Colonoscopia:</strong> Exame de escolha para visualização de todo o cólon e retirada terapêutica de adenomas/pólipos.</li>
+                            <li><strong>Retossigmoidoscopia:</strong> Para avaliação de reto e sigmóide com biópsia.</li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                resDiv.innerHTML = `
+                    <div class="card-result card-green">
+                        <h4>✅ RESULTADO NEGATIVO PARA SANGUE OCULTO NAS FEZES</h4>
+                        <p><strong>Conduta de Enfermagem na APS:</strong></p>
+                        <p>Orientar o paciente quanto ao resultado normal e registrar no prontuário da UBS.</p>
+                        <p>Manter o paciente na rotina de busca ativa da equipe para acompanhamento periódico conforme protocolo municipal.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize evaluations on load
+        window.onload = function() {
+            evalRisco();
+            evalSOF();
+        };
+    </script>
+</body>
+</html>
