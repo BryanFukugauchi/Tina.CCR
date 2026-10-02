@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TINA CCR - Triagem e Rastreamento na APS</title>
-    
-    <!-- Importação de Google Fonts para renderização fiel das fontes do Canva -->
+    <!-- Fonts Mapeadas do Canva -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@500;600;700;800;900&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
     
     <style>
-        /* Definindo Mapeamento e Fallbacks de Fontes do Canva */
+        /* Canva Fonts Mappings */
         @font-face {
             font-family: 'Badhorse';
             src: local('Badhorse'), local('Cinzel Decorative'), serif;
@@ -29,9 +28,6 @@
             --azul-ccr: #6BA0D7;
             --esfumado: #4B66FF;
             --fundo-preto: #000000;
-            --card-bg: rgba(15, 23, 42, 0.85);
-            --border-glow: rgba(107, 160, 215, 0.35);
-            --texto-claro: #F8FAFC;
         }
 
         * {
@@ -42,711 +38,540 @@
 
         body {
             background-color: var(--fundo-preto);
-            background-image: 
-                radial-gradient(circle at 50% 30%, rgba(75, 102, 255, 0.32) 0%, transparent 60%),
-                radial-gradient(circle at 85% 85%, rgba(107, 160, 215, 0.20) 0%, transparent 50%),
-                radial-gradient(circle at 15% 85%, rgba(75, 102, 255, 0.20) 0%, transparent 50%);
-            background-attachment: fixed;
-            color: var(--texto-claro);
-            font-family: 'Montserrat', sans-serif;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar de Navegação */
-        .sidebar {
-            width: 280px;
-            background-color: #030611;
-            border-right: 1px solid var(--border-glow);
-            padding: 24px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 100;
-        }
-
-        .sidebar-brand {
-            text-align: center;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(107, 160, 215, 0.2);
-        }
-
-        .sidebar-brand .tina-side {
-            font-family: 'Badhorse', 'Cinzel Decorative', serif;
-            font-size: 26px;
-            font-weight: 800;
             color: #FFFFFF;
-        }
-
-        .sidebar-brand .ccr-side {
-            font-family: 'Perandory', 'Playfair Display', serif;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--azul-ccr);
-        }
-
-        .sidebar-brand .tagline-side {
-            font-family: 'Cinzel', serif;
-            font-size: 9px;
-            color: #94A3B8;
-            letter-spacing: 2px;
-            margin-top: 4px;
-        }
-
-        .nav-btn {
-            background: transparent;
-            border: none;
-            color: #CBD5E1;
-            padding: 12px 16px;
-            text-align: left;
             font-family: 'Montserrat', sans-serif;
-            font-size: 13px;
-            font-weight: 500;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-btn:hover, .nav-btn.active {
-            background-color: rgba(107, 160, 215, 0.15);
-            color: var(--azul-ccr);
-            font-weight: 700;
-            border-left: 4px solid var(--azul-ccr);
-        }
-
-        /* Área de Conteúdo */
-        .main-content {
-            margin-left: 280px;
-            flex: 1;
-            padding: 40px;
-            max-width: 1200px;
-        }
-
-        /* Cabeçalho da Marca */
-        .brand-header {
-            text-align: center;
-            font-family: 'Cinzel', serif;
-            font-size: 14px;
-            letter-spacing: 5px;
-            color: #94A3B8;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 25px;
-            opacity: 0.9;
-        }
-
-        /* Hero Section (Design Exato do Canva) */
-        .hero-container {
+            min-height: 100vh;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px 0 40px 0;
         }
 
-        .hero-logo-box {
+        /* Ambient Blue Glow no canto inferior direito (Exato da foto) */
+        .glow-bg {
+            position: fixed;
+            bottom: -10%;
+            right: -5%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(75, 102, 255, 0.45) 0%, rgba(37, 99, 235, 0.25) 40%, transparent 70%);
+            filter: blur(60px);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* TELA INICIAL (Apenas os nomes e o botão para iniciar - Slide 1) */
+        .screen-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        /* Top Brand: UNICAMP COTUCA */
+        .top-brand {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            color: #94A3B8;
+            letter-spacing: 4px;
+            font-size: 13px;
+            line-height: 1.4;
+            text-transform: uppercase;
+        }
+
+        /* Main Title & Logo Box */
+        .title-box {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 12px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        .hero-tina {
+        /* Intestine Icon */
+        .intestine-icon {
+            width: 75px;
+            height: 75px;
+        }
+
+        .title-tina {
             font-family: 'Badhorse', 'Cinzel Decorative', serif;
-            font-size: 80px;
+            font-size: 96px;
             font-weight: 900;
             color: #FFFFFF;
-            letter-spacing: 2px;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
             line-height: 1;
+            letter-spacing: -1px;
         }
 
-        .hero-ccr {
+        .title-ccr {
             font-family: 'Perandory', 'Playfair Display', serif;
-            font-size: 72px;
+            font-size: 84px;
             font-weight: 700;
             color: var(--azul-ccr);
-            text-shadow: 0 0 25px rgba(107, 160, 215, 0.5);
             line-height: 1;
         }
 
-        .hero-subtitle-cinzel {
+        /* Subtitle 1: TRIAGEM E IDENTIFICAÇÃO... */
+        .subtitle-cinzel {
             font-family: 'Cinzel', serif;
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 700;
             color: #FFFFFF;
             letter-spacing: 3px;
             text-transform: uppercase;
-            max-width: 850px;
-            margin-top: 15px;
-            margin-bottom: 8px;
-            line-height: 1.5;
+            max-width: 800px;
+            margin-bottom: 12px;
+            line-height: 1.4;
         }
 
-        .hero-subtitle-coco {
+        /* Subtitle 2: VERSÃO CÂNCER COLORRETAL */
+        .subtitle-coco {
             font-family: 'CocoGothic', 'Montserrat', sans-serif;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             color: var(--azul-ccr);
             font-variant: small-caps;
-            letter-spacing: 4px;
-            margin-bottom: 38px;
+            letter-spacing: 3px;
+            margin-bottom: 45px;
         }
 
-        /* Botão Iniciar Triagem estilo Pílula com Glow */
-        .btn-iniciar-triagem {
-            background: linear-gradient(135deg, #6BA0D7 0%, #3B82F6 100%);
+        /* Botão Pílula: INICIAR TRIAGEM */
+        .btn-iniciar {
+            background: linear-gradient(135deg, #6BA0D7 0%, #4B66FF 100%);
             color: #FFFFFF;
             font-family: 'Badhorse', 'Cinzel Decorative', 'Cinzel', serif;
-            font-size: 19px;
+            font-size: 20px;
             font-weight: 700;
-            padding: 16px 52px;
+            padding: 16px 56px;
             border-radius: 50px;
-            border: 2px solid #A5F3FC;
-            box-shadow: 0 0 30px rgba(107, 160, 215, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 25px rgba(107, 160, 215, 0.5);
             cursor: pointer;
-            text-transform: uppercase;
             letter-spacing: 2px;
+            text-transform: uppercase;
             transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
+            outline: none;
         }
 
-        .btn-iniciar-triagem:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 0 45px rgba(75, 102, 255, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.6);
+        .btn-iniciar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(75, 102, 255, 0.8);
+            background: linear-gradient(135deg, #4B66FF 0%, #6BA0D7 100%);
         }
 
-        /* Estilização dos Módulos */
-        .tab-panel {
+        /* Módulos do Sistema (Aparecem após o clique) */
+        .app-section {
             display: none;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
         }
 
-        .tab-panel.active {
-            display: block;
+        .app-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(107, 160, 215, 0.3);
+            margin-bottom: 30px;
         }
 
-        .section-header {
-            font-family: 'Cinzel', serif;
+        .app-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .app-brand .tina-sm {
+            font-family: 'Badhorse', 'Cinzel Decorative', serif;
+            font-size: 24px;
+            color: #FFFFFF;
+        }
+
+        .app-brand .ccr-sm {
+            font-family: 'Perandory', 'Playfair Display', serif;
             font-size: 22px;
-            font-weight: 700;
             color: var(--azul-ccr);
-            border-bottom: 2px solid var(--border-glow);
-            padding-bottom: 10px;
-            margin-bottom: 24px;
         }
 
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-            margin-bottom: 24px;
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
+        .nav-link-btn {
+            background: transparent;
+            border: 1px solid rgba(107, 160, 215, 0.3);
+            color: #CBD5E1;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-link-btn:hover, .nav-link-btn.active {
+            background: var(--azul-ccr);
+            color: #000000;
+            font-weight: 700;
+            border-color: var(--azul-ccr);
+        }
+
+        /* Formulários e Cards */
         .card-dark {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-glow);
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(107, 160, 215, 0.3);
             border-radius: 12px;
-            padding: 22px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
         }
 
-        .card-dark h3 {
+        .card-dark h2 {
             font-family: 'Cinzel', serif;
             color: var(--azul-ccr);
-            font-size: 17px;
-            margin-bottom: 12px;
+            font-size: 20px;
+            margin-bottom: 16px;
         }
 
-        .card-dark ul {
-            padding-left: 18px;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #CBD5E1;
-        }
-
-        /* Cards de Resultados/Alertas */
-        .card-alert {
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            border-left: 6px solid;
-            line-height: 1.6;
-            font-size: 14px;
-        }
-
-        .card-red {
-            background-color: rgba(127, 29, 29, 0.45);
-            border-color: #EF4444;
-            color: #FEE2E2;
-        }
-
-        .card-yellow {
-            background-color: rgba(120, 53, 15, 0.45);
-            border-color: #F59E0B;
-            color: #FEF3C7;
-        }
-
-        .card-green {
-            background-color: rgba(6, 78, 59, 0.45);
-            border-color: #10B981;
-            color: #D1FAE5;
-        }
-
-        .card-blue {
-            background-color: rgba(30, 58, 138, 0.45);
-            border-color: var(--azul-ccr);
-            color: #E0F2FE;
-        }
-
-        /* Formulários e Checkboxes Dark */
         .checkbox-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 12px;
-            margin-top: 12px;
         }
 
-        .checkbox-label {
+        .checkbox-item {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 14px;
-            background: rgba(15, 23, 42, 0.85);
-            padding: 12px 14px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px 16px;
             border-radius: 8px;
             border: 1px solid rgba(107, 160, 215, 0.2);
             cursor: pointer;
-            color: #E2E8F0;
+            font-size: 14px;
         }
 
-        .checkbox-label input {
+        .checkbox-item input {
             width: 18px;
             height: 18px;
             accent-color: var(--azul-ccr);
         }
 
-        .form-control {
-            background-color: #0F172A;
-            border: 1px solid var(--border-glow);
+        .result-box {
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 6px solid;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .res-alert {
+            background: rgba(127, 29, 29, 0.5);
+            border-color: #EF4444;
+            color: #FEE2E2;
+        }
+
+        .res-success {
+            background: rgba(6, 78, 59, 0.5);
+            border-color: #10B981;
+            color: #D1FAE5;
+        }
+
+        .res-warning {
+            background: rgba(120, 53, 15, 0.5);
+            border-color: #F59E0B;
+            color: #FEF3C7;
+        }
+
+        .res-info {
+            background: rgba(30, 58, 138, 0.5);
+            border-color: var(--azul-ccr);
+            color: #E0F2FE;
+        }
+
+        .form-select, .form-input {
+            background: #0F172A;
+            border: 1px solid rgba(107, 160, 215, 0.4);
             color: #FFFFFF;
             padding: 10px 14px;
             border-radius: 8px;
             font-size: 14px;
             width: 100%;
-            max-width: 320px;
+            max-width: 300px;
             margin-top: 6px;
         }
 
-        /* Tabela da Linha do Cuidado */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--card-bg);
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid var(--border-glow);
-            margin-top: 16px;
+        .btn-back {
+            background: transparent;
+            border: 1px solid #64748B;
+            color: #94A3B8;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-bottom: 20px;
         }
 
-        .data-table th, .data-table td {
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 13px;
-            border-bottom: 1px solid rgba(107, 160, 215, 0.15);
-        }
-
-        .data-table th {
-            background-color: #0F172A;
-            color: var(--azul-ccr);
-            font-family: 'Cinzel', serif;
-            font-size: 13px;
+        .btn-back:hover {
+            color: #FFFFFF;
+            border-color: #FFFFFF;
         }
 
         @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; position: relative; }
-            .main-content { margin-left: 0; padding: 20px; }
-            .hero-tina { font-size: 54px; }
-            .hero-ccr { font-size: 48px; }
+            .title-tina { font-size: 60px; }
+            .title-ccr { font-size: 52px; }
+            .subtitle-cinzel { font-size: 14px; }
+            .subtitle-coco { font-size: 12px; }
+            .btn-iniciar { font-size: 16px; padding: 14px 40px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar de Navegação -->
-    <div class="sidebar">
-        <div class="sidebar-brand">
-            <span class="tina-side">TINA</span>
-            <span class="ccr-side">CCR</span>
-            <div class="tagline-side">TRIAGEM E NAVEGAÇÃO APS</div>
+    <!-- Ambient Blue Glow -->
+    <div class="glow-bg"></div>
+
+    <!-- TELA INICIAL (SLIDE 1 - APENAS OS NOMES E O BOTÃO PARA INICIAR) -->
+    <div id="screen-home" class="screen-container">
+        <!-- Top Brand -->
+        <div class="top-brand">
+            UNICAMP<br>COTUCA
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-            <button class="nav-btn active" onclick="switchTab('inicio')">🏠 Tela Inicial</button>
-            <button class="nav-btn" onclick="switchTab('dashboard')">📊 Dashboard & Contexto</button>
-            <button class="nav-btn" onclick="switchTab('triagem')">📋 Triagem de Sintomas</button>
-            <button class="nav-btn" onclick="switchTab('risco')">🧮 Avaliação de Risco</button>
-            <button class="nav-btn" onclick="switchTab('sof')">🧪 Sangue Oculto (SOF)</button>
-            <button class="nav-btn" onclick="switchTab('arvore')">🗺️ Árvore de Decisão</button>
+
+        <!-- Main Title & Logo -->
+        <div class="title-box">
+            <svg class="intestine-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 16C20 12.6863 22.6863 10 26 10H38C41.3137 10 44 12.6863 44 16V18C44 21.3137 41.3137 24 38 24H26C22.6863 24 20 26.6863 20 30V32C20 35.3137 22.6863 38 26 38H38C41.3137 38 44 40.6863 44 44V46C44 49.3137 41.3137 52 38 52H32" stroke="#6BA0D7" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="32" cy="52" r="3.5" fill="#6BA0D7"/>
+            </svg>
+            <span class="title-tina">TINA</span>
+            <span class="title-ccr">CCR</span>
         </div>
+
+        <!-- Subtitles -->
+        <div class="subtitle-cinzel">TRIAGEM E IDENTIFICAÇÃO DE NEOPLASIAS NA ATENÇÃO PRIMÁRIA À SAÚDE</div>
+        <div class="subtitle-coco">VERSÃO CÂNCER COLORRETAL</div>
+
+        <!-- Botão para Iniciar -->
+        <button class="btn-iniciar" onclick="startApp()">INICIAR TRIAGEM</button>
     </div>
 
-    <!-- Conteúdo Principal -->
-    <div class="main-content">
-
-        <!-- TAB 1: TELA INICIAL (DESIGN EXACTO CANVA) -->
-        <div id="tab-inicio" class="tab-panel active">
-            <div class="brand-header">UNICAMP &nbsp;•&nbsp; COTUCA</div>
-
-            <div class="hero-container">
-                <div class="hero-logo-box">
-                    <!-- Ícone Vetorial do Intestino na cor #6BA0D7 -->
-                    <svg width="65" height="65" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 16C20 12.6863 22.6863 10 26 10H38C41.3137 10 44 12.6863 44 16V18C44 21.3137 41.3137 24 38 24H26C22.6863 24 20 26.6863 20 30V32C20 35.3137 22.6863 38 26 38H38C41.3137 38 44 40.6863 44 44V46C44 49.3137 41.3137 52 38 52H32" stroke="#6BA0D7" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="32" cy="52" r="3.5" fill="#6BA0D7"/>
-                    </svg>
-                    <span class="hero-tina">TINA</span>
-                    <span class="hero-ccr">CCR</span>
-                </div>
-                
-                <div class="hero-subtitle-cinzel">TRIAGEM E IDENTIFICAÇÃO DE NEOPLASIAS NA ATENÇÃO PRIMÁRIA À SAÚDE</div>
-                <div class="hero-subtitle-coco">VERSÃO CÂNCER COLORRETAL</div>
-
-                <button class="btn-iniciar-triagem" onclick="switchTab('triagem')">INICIAR TRIAGEM</button>
+    <!-- MÓDULOS INTERNOS DO APLICATIVO -->
+    <div id="screen-app" class="app-section">
+        <div class="app-nav">
+            <div class="app-brand" onclick="goHome()">
+                <span class="tina-sm">TINA</span>
+                <span class="ccr-sm">CCR</span>
             </div>
-
-            <div class="cards-grid" style="margin-top: 30px;">
-                <div class="card-dark" style="text-align: center;">
-                    <div style="font-size: 28px; margin-bottom: 8px;">🩺</div>
-                    <h3>Acolhimento na APS</h3>
-                    <p style="font-size: 13px; color: #94A3B8;">Triagem de sinais de alerta e anamnese durante a consulta privativa de enfermagem na UBS.</p>
-                </div>
-                <div class="card-dark" style="text-align: center;">
-                    <div style="font-size: 28px; margin-bottom: 8px;">🧪</div>
-                    <h3>Rastreamento Oportuno</h3>
-                    <p style="font-size: 13px; color: #94A3B8;">Protocolo de solicitação do Teste Imunoquímico Fecal (FIT) em assintomáticos ≥ 50 anos.</p>
-                </div>
-                <div class="card-dark" style="text-align: center;">
-                    <div style="font-size: 28px; margin-bottom: 8px;">🗺️</div>
-                    <h3>Navegação Assistencial</h3>
-                    <p style="font-size: 13px; color: #94A3B8;">Direcionamento ágil do paciente para confirmação por Colonoscopia na Atenção Secundária.</p>
-                </div>
+            <div class="nav-links">
+                <button class="nav-link-btn active" onclick="showModule('triagem', this)">📋 Triagem de Sintomas</button>
+                <button class="nav-link-btn" onclick="showModule('risco', this)">🧮 Avaliação de Risco</button>
+                <button class="nav-link-btn" onclick="showModule('sof', this)">🧪 Sangue Oculto (SOF)</button>
+                <button class="nav-link-btn" onclick="showModule('dashboard', this)">📊 Contexto & Dados</button>
+                <button class="nav-link-btn" onclick="goHome()">🏠 Voltar à Tela Inicial</button>
             </div>
         </div>
 
-        <!-- TAB 2: DASHBOARD -->
-        <div id="tab-dashboard" class="tab-panel">
-            <div class="section-header">Câncer Colorretal (CCR): Panorama Epidemiológico e da Enfermagem</div>
-
-            <div class="cards-grid">
-                <div class="card-dark" style="text-align: center;">
-                    <div style="font-family: 'Cinzel', serif; font-size: 24px; color: var(--azul-ccr); font-weight: 700;">53.810</div>
-                    <div style="font-size: 12px; color: #94A3B8; text-transform: uppercase; margin-top: 4px;">Novos Casos/Ano no BR</div>
-                </div>
-                <div class="card-dark" style="text-align: center;">
-                    <div style="font-family: 'Cinzel', serif; font-size: 24px; color: var(--azul-ccr); font-weight: 700;">25,11</div>
-                    <div style="font-size: 12px; color: #94A3B8; text-transform: uppercase; margin-top: 4px;">Taxa por 100 mil hab.</div>
-                </div>
-                <div class="card-dark" style="text-align: center;">
-                    <div style="font-family: 'Cinzel', serif; font-size: 24px; color: var(--azul-ccr); font-weight: 700;">55% - 70%</div>
-                    <div style="font-size: 12px; color: #94A3B8; text-transform: uppercase; margin-top: 4px;">Diagnóstico Tardio</div>
-                </div>
-                <div class="card-dark" style="text-align: center;">
-                    <div style="font-family: 'Cinzel', serif; font-size: 24px; color: var(--azul-ccr); font-weight: 700;">8,5%</div>
-                    <div style="font-size: 12px; color: #94A3B8; text-transform: uppercase; margin-top: 4px;">Mortalidade Inicial</div>
-                </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
-                <div class="card-dark">
-                    <h3>📌 Papel Estratégico da Enfermagem na APS</h3>
-                    <ul>
-                        <li><strong>Porta de Entrada:</strong> Ordenamento da rede de atenção à saúde do SUS pela UBS.</li>
-                        <li><strong>Consulta Privativa:</strong> Identificação de hábitos de vida e rastreamento de antecedentes familiares.</li>
-                        <li><strong>Busca Ativa:</strong> Convocação periódica da população adscrita assintomática ≥ 50 anos.</li>
-                        <li><strong>Inversão do Diagnóstico Tardio:</strong> Evitar o diagnóstico médio tardio aos 64 anos através da detecção na fase adenomatosa.</li>
-                    </ul>
-                </div>
-                <div class="card-dark">
-                    <h3>🧬 Fisiopatologia e Progressão Neoplásica</h3>
-                    <ul>
-                        <li><strong>Desenvolvimento:</strong> Mutações no epitélio mucoso do cólon/reto levam ao crescimento desordenado de pólipos.</li>
-                        <li><strong>Sequência Adenoma-Carcinoma:</strong> Processo lento que permite intervenção preventiva antes da invasão tecidual.</li>
-                        <li><strong>Cura e Sobrevida:</strong> A ressecção de lesões pré-neoplásicas em exames endoscópicos reduz drasticamente a mortalidade.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 3: TRIAGEM DE SINTOMAS -->
-        <div id="tab-triagem" class="tab-panel">
-            <div class="section-header">Acolhimento Inicial: Módulo de Sintomas de Alerta</div>
-
+        <!-- MÓDULO 1: TRIAGEM DE SINTOMAS -->
+        <div id="mod-triagem" class="module-content">
+            <button class="btn-back" onclick="goHome()">← Voltar para Início</button>
             <div class="card-dark">
-                <h3>1. Sintomas Localizados e Gerais (Marque os presentes)</h3>
+                <h2>1. Triagem de Sintomas de Alerta (Sintomáticos)</h2>
+                <p style="color: #94A3B8; font-size: 14px; margin-bottom: 16px;">Assinale os sinais ou sintomas identificados durante a anamnese de enfermagem:</p>
                 <div class="checkbox-grid">
-                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Afinamento das fezes</label>
-                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Sensação de evacuação incompleta (tenesmo)</label>
-                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Flatulência excessiva e/ou cólica constante</label>
-                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Presença de sangue vivo nas fezes</label>
-                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Sangramento retal frequente</label>
-                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Perda de peso repentina inexplicada</label>
-                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Distensão abdominal inexplicada</label>
-                    <label class="checkbox-label"><input type="checkbox" class="sintoma-check" onchange="evalSintomas()"> Anemia de origem não esclarecida</label>
+                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalSintomas()"> Afinamento das fezes</label>
+                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalSintomas()"> Tenesmo (evacuação incompleta)</label>
+                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalSintomas()"> Flatulência excessiva / cólica constante</label>
+                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalSintomas()"> Presença de sangue vivo nas fezes</label>
+                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalSintomas()"> Sangramento retal frequente</label>
+                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalSintomas()"> Perda de peso inexplicada</label>
+                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalSintomas()"> Distensão abdominal inexplicada</label>
+                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalSintomas()"> Anemia de origem não esclarecida</label>
                 </div>
             </div>
 
-            <div id="resultado-sintomas">
-                <div class="card-alert card-green">
-                    <h4 style="font-family: 'Cinzel', serif;">✅ PACIENTE ASSINTOMÁTICO</h4>
-                    <p>Nenhum sinal de alerta identificado. Prosseguir para a <strong>Avaliação de Risco e Rastreamento de Rotina</strong>.</p>
+            <div id="res-sintomas">
+                <div class="result-box res-success">
+                    <h3 style="font-family: 'Cinzel', serif; margin-bottom: 6px;">✅ PACIENTE ASSINTOMÁTICO</h3>
+                    <p>Nenhum sinal de alerta identificado no momento. Clique na aba <strong>"Avaliação de Risco"</strong> para verificar a elegibilidade de rastreamento de rotina.</p>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 4: AVALIAÇÃO DE RISCO -->
-        <div id="tab-risco" class="tab-panel">
-            <div class="section-header">Estratificação de Risco e Elegibilidade</div>
-
-            <div class="card-dark" style="margin-bottom: 20px;">
-                <h3>1. Dados Demográficos</h3>
+        <!-- MÓDULO 2: AVALIAÇÃO DE RISCO -->
+        <div id="mod-risco" class="module-content" style="display: none;">
+            <div class="card-dark">
+                <h2>2. Estratificação de Risco e Elegibilidade</h2>
                 <label style="font-size: 14px;">Idade do paciente (anos):</label><br>
-                <input type="number" id="idade-input" class="form-control" value="52" min="18" max="110" onchange="evalRisco()">
-            </div>
+                <input type="number" id="input-idade" class="form-input" value="52" min="18" max="110" onchange="evalRisco()"><br><br>
 
-            <div class="card-dark">
-                <h3>2. Fatores Hereditários e Condições Clínicas de Alto Risco</h3>
+                <h3 style="font-size: 15px; color: var(--azul-ccr); margin-bottom: 10px;">Fatores Hereditários e Condições Clínicas de Alto Risco:</h3>
                 <div class="checkbox-grid">
-                    <label class="checkbox-label"><input type="checkbox" class="hereditario-check" onchange="evalRisco()"> Polipose Adenomatosa Familiar (FAP)</label>
-                    <label class="checkbox-label"><input type="checkbox" class="hereditario-check" onchange="evalRisco()"> Síndrome de Lynch (CCRRNP)</label>
-                    <label class="checkbox-label"><input type="checkbox" class="hereditario-check" onchange="evalRisco()"> Doença Inflamatória Intestinal (Colite/Crohn)</label>
-                    <label class="checkbox-label"><input type="checkbox" class="hereditario-check" onchange="evalRisco()"> Diabetes Tipo 2</label>
-                    <label class="checkbox-label"><input type="checkbox" class="hereditario-check" onchange="evalRisco()"> Radiação ionizante abdominal/pélvica prévia</label>
+                    <label class="checkbox-item"><input type="checkbox" class="risco-check" onchange="evalRisco()"> Polipose Adenomatosa Familiar (FAP)</label>
+                    <label class="checkbox-item"><input type="checkbox" class="risco-check" onchange="evalRisco()"> Síndrome de Lynch (CCRRNP)</label>
+                    <label class="checkbox-item"><input type="checkbox" class="risco-check" onchange="evalRisco()"> Doença Inflamatória Intestinal (Colite/Crohn)</label>
+                    <label class="checkbox-item"><input type="checkbox" class="risco-check" onchange="evalRisco()"> Diabetes Tipo 2</label>
+                    <label class="checkbox-item"><input type="checkbox" class="risco-check" onchange="evalRisco()"> Radiação ionizante abdominal/pélvica prévia</label>
                 </div>
             </div>
 
-            <div id="resultado-risco">
-                <!-- Injetado via JS -->
-            </div>
+            <div id="res-risco"></div>
         </div>
 
-        <!-- TAB 5: SANGUE OCULTO -->
-        <div id="tab-sof" class="tab-panel">
-            <div class="section-header">Registro e Interpretação do Teste de Sangue Oculto</div>
-
+        <!-- MÓDULO 3: SANGUE OCULTO (SOF) -->
+        <div id="mod-sof" class="module-content" style="display: none;">
             <div class="card-dark">
+                <h2>3. Registro do Teste de Sangue Oculto nas Fezes</h2>
                 <div style="margin-bottom: 16px;">
-                    <label style="font-size: 14px; font-weight: 600;">Selecione o teste realizado:</label><br>
-                    <select id="tipo-teste" class="form-control" onchange="evalSOF()">
+                    <label style="font-size: 14px;">Selecione o teste realizado:</label><br>
+                    <select id="select-teste" class="form-select" onchange="evalSOF()">
                         <option value="FIT">FIT (Teste Imunoquímico Fecal) - Preferencial</option>
                         <option value="g-FOBT">g-FOBT (Teste por Guaiaco) - Alternativa</option>
                     </select>
                 </div>
-
                 <div>
-                    <label style="font-size: 14px; font-weight: 600;">Resultado do Exame:</label><br>
-                    <select id="resultado-teste" class="form-control" onchange="evalSOF()">
+                    <label style="font-size: 14px;">Resultado do Exame:</label><br>
+                    <select id="select-resultado" class="form-select" onchange="evalSOF()">
                         <option value="negativo">Negativo (-)</option>
                         <option value="positivo">Positivo (+)</option>
                     </select>
                 </div>
             </div>
 
-            <div id="resultado-sof">
-                <!-- Injetado via JS -->
+            <div id="res-sof"></div>
+        </div>
+
+        <!-- MÓDULO 4: CONTEXTO & DADOS -->
+        <div id="mod-dashboard" class="module-content" style="display: none;">
+            <div class="card-dark">
+                <h2>4. Panorama Epidemiológico & Fisiopatologia</h2>
+                <p style="font-size: 14px; line-height: 1.6; color: #CBD5E1;">
+                    • <strong>Incidência no Brasil:</strong> Estimativa de 53.810 novos casos/ano (INCA 2026-2028), sendo o 3º câncer mais comum.<br>
+                    • <strong>Diagnóstico Tardio:</strong> Entre 55% e 70% dos diagnósticos ocorrem nos estágios III e IV.<br>
+                    • <strong>Ação da Enfermagem na APS:</strong> A consulta privativa do enfermeiro e a busca ativa garantem a identificação na fase de pólipo benigno, reduzindo drasticamente a mortalidade.
+                </p>
             </div>
         </div>
-
-        <!-- TAB 6: ÁRVORE DE DECISÃO -->
-        <div id="tab-arvore" class="tab-panel">
-            <div class="section-header">Matriz de Navegação da Linha do Cuidado no SUS</div>
-
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Etapa</th>
-                        <th>Público-Alvo</th>
-                        <th>Ação da Enfermagem</th>
-                        <th>Destino Regulatório</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>1. Acolhimento</strong></td>
-                        <td>Geral da UBS</td>
-                        <td>Triagem de sintomas (sintomático vs assintomático)</td>
-                        <td>APS / Atenção Secundária</td>
-                    </tr>
-                    <tr>
-                        <td><strong>2. Sintomáticos</strong></td>
-                        <td>Sangramento, fezes finas, perda peso</td>
-                        <td>Encaminhamento direto para endoscopia/colonoscopia</td>
-                        <td>Atenção Secundária</td>
-                    </tr>
-                    <tr>
-                        <td><strong>3. Assintomáticos &lt; 50 anos</strong></td>
-                        <td>Sem alto risco hereditário</td>
-                        <td>Promover hábitos saudáveis (fibras, exercício)</td>
-                        <td>Acompanhamento na APS</td>
-                    </tr>
-                    <tr>
-                        <td><strong>4. Alto Risco Hereditário</strong></td>
-                        <td>FAP, Lynch, DII, Diabetes tipo 2</td>
-                        <td>Encaminhamento especializado direto</td>
-                        <td>Atenção Secundária</td>
-                    </tr>
-                    <tr>
-                        <td><strong>5. Elegíveis Rastreio</strong></td>
-                        <td>Assintomáticos ≥ 50 anos</td>
-                        <td>Solicitar teste FIT (ou g-FOBT)</td>
-                        <td>Laboratório de Análises</td>
-                    </tr>
-                    <tr>
-                        <td><strong>6. FIT/g-FOBT Positivo</strong></td>
-                        <td>Sangue oculto detectado</td>
-                        <td>Regulação para Colonoscopia</td>
-                        <td>Atenção Secundária</td>
-                    </tr>
-                    <tr>
-                        <td><strong>7. Pólipo Ressecado</strong></td>
-                        <td>Achado em colonoscopia</td>
-                        <td>Prevenção da sequência adenoma-carcinoma</td>
-                        <td>Vigilância Endoscópica</td>
-                    </tr>
-                    <tr>
-                        <td><strong>8. CCR Confirmado</strong></td>
-                        <td>Diagnóstico histopatológico</td>
-                        <td>Encaminhamento urgente para oncologia/cirurgia</td>
-                        <td>Atenção Terciária</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
     </div>
 
-    <!-- JavaScript Vanilla -->
+    <!-- Script de Navegação e Lógica Clínica -->
     <script>
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        function startApp() {
+            document.getElementById('screen-home').style.display = 'none';
+            document.getElementById('screen-app').style.display = 'block';
+            evalRisco();
+            evalSOF();
+        }
 
-            document.getElementById('tab-' + tabId).classList.add('active');
-            
-            const btns = document.querySelectorAll('.nav-btn');
-            btns.forEach(btn => {
-                if (btn.getAttribute('onclick').includes(tabId)) {
-                    btn.classList.add('active');
-                }
-            });
+        function goHome() {
+            document.getElementById('screen-app').style.display = 'none';
+            document.getElementById('screen-home').style.display = 'flex';
+        }
+
+        function showModule(modId, btnEl) {
+            document.querySelectorAll('.module-content').forEach(m => m.style.display = 'none');
+            document.querySelectorAll('.nav-link-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById('mod-' + modId).style.display = 'block';
+            if (btnEl) btnEl.classList.add('active');
         }
 
         function evalSintomas() {
-            const checkboxes = document.querySelectorAll('.sintoma-check');
-            let hasSintoma = false;
-            checkboxes.forEach(cb => { if (cb.checked) hasSintoma = true; });
+            const checks = document.querySelectorAll('.sint-check');
+            let hasSint = false;
+            checks.forEach(c => { if (c.checked) hasSint = true; });
 
-            const resDiv = document.getElementById('resultado-sintomas');
-            if (hasSintoma) {
+            const resDiv = document.getElementById('res-sintomas');
+            if (hasSint) {
                 resDiv.innerHTML = `
-                    <div class="card-alert card-red">
-                        <h4 style="font-family: 'Cinzel', serif;">⚠️ ATENÇÃO: PACIENTE SINTOMÁTICO IDENTIFICADO!</h4>
-                        <p><strong>Diretriz Clínica de Conduta Imediata:</strong></p>
-                        <ul>
-                            <li>O paciente <strong>NÃO</strong> deve realizar apenas o teste de sangue oculto nas fezes (FIT/g-FOBT).</li>
-                            <li>Encaminhar diretamente para a <strong>Atenção Secundária</strong> para investigação endoscópica:
-                                <ul>
-                                    <li><strong>Retossigmoidoscopia:</strong> Exame do reto e sigmóide com biópsia.</li>
-                                    <li><strong>Colonoscopia:</strong> Avaliação do cólon completo e ressecção de lesões.</li>
-                                </ul>
-                            </li>
-                        </ul>
+                    <div class="result-box res-alert">
+                        <h3 style="font-family: 'Cinzel', serif; margin-bottom: 6px;">⚠️ ATENÇÃO: PACIENTE SINTOMÁTICO IDENTIFICADO!</h3>
+                        <p><strong>Diretriz Clínica:</strong> O paciente <strong>NÃO</strong> deve realizar apenas o teste de sangue oculto nas fezes (FIT/g-FOBT).</p>
+                        <p><strong>Encaminhamento Imediato:</strong> Regular para a <strong>Atenção Secundária</strong> para investigação endoscópica (Retossigmoidoscopia ou Colonoscopia).</p>
                     </div>
                 `;
             } else {
                 resDiv.innerHTML = `
-                    <div class="card-alert card-green">
-                        <h4 style="font-family: 'Cinzel', serif;">✅ PACIENTE ASSINTOMÁTICO</h4>
-                        <p>Nenhum sinal de alerta identificado. Prosseguir para a <strong>Avaliação de Risco e Rastreamento de Rotina</strong>.</p>
+                    <div class="result-box res-success">
+                        <h3 style="font-family: 'Cinzel', serif; margin-bottom: 6px;">✅ PACIENTE ASSINTOMÁTICO</h3>
+                        <p>Nenhum sinal de alerta identificado. Clique em <strong>"Avaliação de Risco"</strong> para verificar a indicação do teste de rastreamento de rotina.</p>
                     </div>
                 `;
             }
         }
 
         function evalRisco() {
-            const idade = parseInt(document.getElementById('idade-input').value) || 0;
-            const cbs = document.querySelectorAll('.hereditario-check');
+            const idade = parseInt(document.getElementById('input-idade').value) || 0;
+            const checks = document.querySelectorAll('.risco-check');
             let isAltoRisco = false;
-            cbs.forEach(cb => { if (cb.checked) isAltoRisco = true; });
+            checks.forEach(c => { if (c.checked) isAltoRisco = true; });
 
-            const resDiv = document.getElementById('resultado-risco');
-
+            const resDiv = document.getElementById('res-risco');
             if (isAltoRisco) {
                 resDiv.innerHTML = `
-                    <div class="card-alert card-yellow">
-                        <h4 style="font-family: 'Cinzel', serif;">🚨 ESTRATIFICAÇÃO: ALTO RISCO HEREDITÁRIO OU CLÍNICO</h4>
-                        <p>Devido a condições genéticas ou inflamatórias predisponentes, o paciente necessita de avaliação especializada.</p>
-                        <p><strong>Encaminhamento direto para Gastroenterologia / Colonoscopia na Atenção Secundária</strong>, independente da idade.</p>
+                    <div class="result-box res-warning">
+                        <h3 style="font-family: 'Cinzel', serif; margin-bottom: 6px;">🚨 ALTO RISCO HEREDITÁRIO OU CLÍNICO</h3>
+                        <p>Paciente com antecedentes de FAP, Síndrome de Lynch, DII ou diabetes tipo 2.</p>
+                        <p><strong>Conduta:</strong> Encaminhamento direto para Gastroenterologia / Colonoscopia na Atenção Secundária, independente da idade.</p>
                     </div>
                 `;
             } else if (idade < 50) {
                 resDiv.innerHTML = `
-                    <div class="card-alert card-blue">
-                        <h4 style="font-family: 'Cinzel', serif;">ℹ️ PACIENTE FORA DA FAIXA ETÁRIA DE RASTREIO DE ROTINA (&lt; 50 ANOS)</h4>
-                        <p>Sem indicação de teste de sangue oculto nas fezes de rotina no momento.</p>
-                        <p><strong>Ações de Promoção à Saúde na APS:</strong> Orientar sobre hábitos saudáveis (redução de carnes processadas, álcool e tabagismo; consumo de fibras e atividade física).</p>
+                    <div class="result-box res-info">
+                        <h3 style="font-family: 'Cinzel', serif; margin-bottom: 6px;">ℹ️ FORA DA FAIXA ETÁRIA DE RASTREIO DE ROTINA (&lt; 50 ANOS)</h3>
+                        <p>Sem indicação de rastreio de rotina por sangue oculto no momento.</p>
+                        <p><strong>Conduta:</strong> Promover ações de educação em saúde e orientar sobre hábitos alimentares e estilo de vida.</p>
                     </div>
                 `;
             } else {
                 resDiv.innerHTML = `
-                    <div class="card-alert card-green">
-                        <h4 style="font-family: 'Cinzel', serif;">✅ PACIENTE ELEGÍVEL PARA RASTREAMENTO DE ROTINA (Assintomático, Idade ≥ 50 anos)</h4>
-                        <p><strong>Diretriz de Solicitação do Exame:</strong></p>
-                        <ul>
-                            <li><strong>1ª Opção (Preferencial): FIT (Teste Imunoquímico Fecal)</strong> — Uso de anticorpos contra a porção globina humana; alta praticidade e sensibilidade; sem necessidade de restrição alimentar.</li>
-                            <li><strong>2ª Opção (Alternativa): g-FOBT (Teste por Guaiaco)</strong> — Utilizado na falta do FIT; exige preparo alimentar prévio.</li>
-                        </ul>
+                    <div class="result-box res-success">
+                        <h3 style="font-family: 'Cinzel', serif; margin-bottom: 6px;">✅ PACIENTE ELEGÍVEL PARA RASTREAMENTO DE ROTINA (≥ 50 anos)</h3>
+                        <p><strong>Solicitação de Exame:</strong> Solicitar <strong>FIT (Teste Imunoquímico Fecal)</strong> como opção preferencial (sem necessidade de restrição alimentar) ou <strong>g-FOBT</strong> como alternativa.</p>
                     </div>
                 `;
             }
         }
 
         function evalSOF() {
-            const teste = document.getElementById('tipo-teste').value;
-            const res = document.getElementById('resultado-teste').value;
-            const resDiv = document.getElementById('resultado-sof');
+            const teste = document.getElementById('select-teste').value;
+            const res = document.getElementById('select-resultado').value;
+            const resDiv = document.getElementById('res-sof');
 
             if (res === 'positivo') {
                 resDiv.innerHTML = `
-                    <div class="card-alert card-red">
-                        <h4 style="font-family: 'Cinzel', serif;">🚨 RESULTADO POSITIVO PARA SANGUE OCULTO NAS FEZES</h4>
-                        <p>O resultado positivo no <strong>${teste}</strong> indica sangramento ativo no trato gastrointestinal.</p>
-                        <p><strong>Conduta Imediata de Enfermagem:</strong> Agendar retorno e regular o paciente para a <strong>Atenção Secundária para Colonoscopia</strong> (exame de escolha para ressecção de pólipos/adenomas).</p>
+                    <div class="result-box res-alert">
+                        <h3 style="font-family: 'Cinzel', serif; margin-bottom: 6px;">🚨 SANGUE OCULTO POSITIVO (${teste})</h3>
+                        <p>Detectado sangramento ativo no trato gastrointestinal.</p>
+                        <p><strong>Conduta de Enfermagem:</strong> Regular e agendar o paciente para a <strong>Atenção Secundária para Colonoscopia</strong>.</p>
                     </div>
                 `;
             } else {
                 resDiv.innerHTML = `
-                    <div class="card-alert card-green">
-                        <h4 style="font-family: 'Cinzel', serif;">✅ RESULTADO NEGATIVO PARA SANGUE OCULTO NAS FEZES</h4>
-                        <p>Orientar o paciente quanto ao resultado normal, registrar no prontuário da UBS e mantê-lo na rotina de busca ativa periódica da equipe de enfermagem.</p>
+                    <div class="result-box res-success">
+                        <h3 style="font-family: 'Cinzel', serif; margin-bottom: 6px;">✅ SANGUE OCULTO NEGATIVO</h3>
+                        <p>Resultado normal. Registrar no prontuário da UBS e manter o paciente no ciclo de busca ativa periódica da enfermagem.</p>
                     </div>
                 `;
             }
         }
-
-        window.onload = function() {
-            evalRisco();
-            evalSOF();
-        };
     </script>
 </body>
 </html>
