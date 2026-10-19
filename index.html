@@ -1,781 +1,1046 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TINA CCR - Triagem e Rastreamento na APS</title>
-    <!-- Fontes do Google Fonts ajustadas para corresponder fielmente ao design do Canva -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* Fontes do Canva com Fallbacks Precisos */
-        @font-face {
-            font-family: 'Badhorse';
-            src: local('Badhorse'), local('Cinzel Decorative'), serif;
-        }
-        @font-face {
-            font-family: 'Perandory';
-            src: local('Perandory'), local('Playfair Display'), serif;
-        }
-        @font-face {
-            font-family: 'CocoGothic';
-            src: local('Coco Gothic'), local('Montserrat'), sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="TINA CCR: ferramenta de apoio à triagem e identificação de neoplasias colorretais na Atenção Primária à Saúde (SUS). Projeto UNICAMP / COTUCA.">
+<meta name="theme-color" content="#000000">
+<title>TINA CCR — Triagem e Identificação de Neoplasias na APS (Câncer Colorretal)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23000'/%3E%3Cpath d='M20 16c0-3.3 2.7-6 6-6h12c3.3 0 6 2.7 6 6v2c0 3.3-2.7 6-6 6H26c-3.3 0-6 2.7-6 6v2c0 3.3 2.7 6 6 6h12c3.3 0 6 2.7 6 6v2c0 3.3-2.7 6-6 6h-6' fill='none' stroke='%236BA0D7' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 
-        :root {
-            --azul-ccr: #6BA0D7;
-            --esfumado: #4B66FF;
-            --fundo-preto: #000000;
-            --card-bg: rgba(15, 23, 42, 0.90);
-            --border-glow: rgba(107, 160, 215, 0.4);
-            --texto-claro: #F8FAFC;
-        }
+<style>
+/* ==========================================================================
+   TINA CCR v5 — estilos
+   Estrutura: 1 Variáveis · 2 Base · 3 Tela inicial · 4 Layout do sistema
+              5 Componentes · 6 Resultados clínicos · 7 Utilitários · 8 Impressão
+   ========================================================================== */
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+/* 1. VARIÁVEIS */
+:root{
+  --azul:#6BA0D7; --azul-forte:#2B6CB0; --indigo:#3F51D9;
+  --bg:#000; --surface:rgba(15,23,42,.92); --surface-2:#0F172A;
+  --borda:rgba(107,160,215,.35); --texto:#F8FAFC; --texto-2:#CBD5E1; --muda:#94A3B8;
+  --ok:#10B981; --warn:#F59E0B; --erro:#EF4444;
+  --font-ui:'Montserrat',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --font-display:'Cinzel','Times New Roman',serif;
+}
 
-        body {
-            background-color: var(--fundo-preto);
-            color: var(--texto-claro);
-            font-family: 'Montserrat', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            font-size: 16px;
-        }
+/* 2. BASE */
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--texto);font-family:var(--font-ui);line-height:1.5;min-height:100vh;overflow-x:hidden}
+:focus-visible{outline:3px solid #FBBF24;outline-offset:2px}
+.skip-link{position:absolute;left:-999px;top:8px;background:#FBBF24;color:#000;padding:8px 14px;border-radius:6px;z-index:1000;font-weight:700}
+.skip-link:focus{left:8px}
+.ic{width:1.1em;height:1.1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.15em}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.glow-bg{position:fixed;bottom:-10%;right:-5%;width:650px;height:650px;background:radial-gradient(circle,rgba(75,102,255,.45) 0%,rgba(37,99,235,.25) 40%,transparent 70%);filter:blur(70px);pointer-events:none;z-index:0}
 
-        /* Ambient Blue Glow no canto inferior direito */
-        .glow-bg {
-            position: fixed;
-            bottom: -15%;
-            right: -8%;
-            width: 700px;
-            height: 700px;
-            background: radial-gradient(circle, rgba(75, 102, 255, 0.5) 0%, rgba(37, 99, 235, 0.22) 45%, transparent 70%);
-            filter: blur(70px);
-            pointer-events: none;
-            z-index: 1;
-        }
+/* 3. TELA INICIAL */
+.home{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 20px 40px;text-align:center}
+.top-brand{position:absolute;top:36px;left:50%;transform:translateX(-50%);font-family:var(--font-display);font-weight:700;color:var(--muda);letter-spacing:5px;font-size:14px;text-transform:uppercase;white-space:nowrap}
+.title-box{display:flex;align-items:center;justify-content:center;gap:15px;margin-bottom:20px;flex-wrap:wrap}
+.intestine-icon{width:80px;height:80px}
+.title-tina{font-family:'Cinzel Decorative',var(--font-display);font-size:102px;font-weight:900;line-height:1;letter-spacing:-1px}
+.title-ccr{font-family:'Playfair Display',Georgia,serif;font-size:90px;font-weight:700;color:var(--azul);line-height:1}
+.subtitle-main{font-family:var(--font-display);font-size:19px;font-weight:700;letter-spacing:3px;text-transform:uppercase;max-width:850px;margin-bottom:12px;line-height:1.4}
+.subtitle-sub{font-size:15px;font-weight:600;color:var(--azul);font-variant:small-caps;letter-spacing:4px;margin-bottom:40px}
+.btn-iniciar{background:linear-gradient(135deg,var(--azul-forte),var(--indigo));color:#fff;font-family:var(--font-display);font-size:21px;font-weight:700;padding:18px 60px;border-radius:50px;border:2px solid rgba(255,255,255,.45);box-shadow:0 0 30px rgba(107,160,215,.5);cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:transform .25s,box-shadow .25s}
+.btn-iniciar:hover{transform:scale(1.04);box-shadow:0 0 45px rgba(75,102,255,.85)}
+.home-aviso{max-width:720px;margin-top:36px;font-size:12.5px;color:var(--muda);line-height:1.6}
 
-        /* -----------------------------------------------------------------
-           TELA INICIAL (DESIGN FIEL AO SLIDE DO CANVA)
-        ----------------------------------------------------------------- */
-        .screen-container {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 24px;
-            text-align: center;
-        }
+/* 4. LAYOUT DO SISTEMA */
+.app{display:none;position:relative;z-index:10;max-width:1320px;margin:0 auto;padding:24px 20px 40px}
+.patient-bar{background:linear-gradient(90deg,rgba(15,23,42,.95),rgba(30,58,138,.85));border:1px solid var(--azul);border-radius:12px;padding:14px 22px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.patient-info{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.badge-ativo{background:var(--azul);color:#000;font-weight:800;padding:4px 10px;border-radius:6px;font-size:12px;text-transform:uppercase}
+.patient-meta{font-size:13px;color:var(--texto-2);margin-top:2px}
+.app-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--borda);margin-bottom:24px}
+.app-brand{display:flex;align-items:center;gap:10px;background:none;border:0;color:inherit;cursor:pointer}
+.tina-sm{font-family:'Cinzel Decorative',var(--font-display);font-size:26px;font-weight:900}
+.ccr-sm{font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:700;color:var(--azul)}
+.tablist{display:flex;gap:8px;flex-wrap:wrap}
+.tab-btn{display:flex;align-items:center;gap:8px;background:rgba(15,23,42,.7);border:1px solid var(--borda);color:var(--texto-2);padding:10px 16px;border-radius:25px;font:600 13.5px var(--font-ui);cursor:pointer;transition:background .2s,color .2s}
+.tab-btn:hover{border-color:var(--azul);color:#fff}
+.tab-btn[aria-selected="true"]{background:var(--azul);color:#000;border-color:var(--azul);font-weight:700}
+.tab-panel[hidden]{display:none}
+.app-footer{margin-top:40px;padding-top:22px;border-top:1px solid var(--borda);font-size:12.5px;color:var(--muda);line-height:1.7}
+.app-footer a{color:var(--azul)}
+.app-footer ul{padding-left:18px;margin:6px 0 12px}
 
-        /* Top Brand: UNICAMP COTUCA */
-        .top-brand {
-            position: absolute;
-            top: 45px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            font-family: 'Cinzel', serif;
-            font-weight: 800;
-            color: #94A3B8;
-            letter-spacing: 5px;
-            font-size: 15px;
-            line-height: 1.5;
-            text-transform: uppercase;
-        }
+/* 5. COMPONENTES */
+.card{background:var(--surface);border:1px solid var(--borda);border-radius:14px;padding:26px;margin-bottom:24px;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,.6)}
+.card h2{font-family:var(--font-display);color:var(--azul);font-size:21px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(107,160,215,.2)}
+.card h3{font-family:var(--font-display);font-size:16px;margin-bottom:10px}
+.lead{color:var(--texto-2);font-size:14px;margin-bottom:18px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:18px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13.5px;font-weight:600;color:var(--texto-2)}
+.req{color:#FCA5A5}
+.control{background:var(--surface-2);border:1px solid rgba(107,160,215,.5);color:#fff;padding:11px 14px;border-radius:8px;font:14px var(--font-ui);width:100%}
+.control[aria-invalid="true"]{border-color:var(--erro);background:rgba(127,29,29,.25)}
+.control::placeholder{color:#7C8AA0}
+.err{color:#FCA5A5;font-size:12.5px;min-height:1em}
+.hint{color:var(--muda);font-size:12.5px}
+fieldset{border:0;margin:0;padding:0}
+legend{font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:6px}
+.check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin:12px 0 4px}
+.check{display:flex;align-items:flex-start;gap:12px;background:rgba(0,0,0,.5);padding:12px 16px;border-radius:10px;border:1px solid rgba(107,160,215,.3);cursor:pointer;font-size:14px;color:#E2E8F0}
+.check:hover{border-color:var(--azul);background:rgba(107,160,215,.1)}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--azul);flex:none}
+.check.assint{background:rgba(6,78,59,.35);border-color:var(--ok);color:#A7F3D0;font-weight:700}
+.btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--azul-forte),var(--indigo));color:#fff;font:700 14px var(--font-ui);padding:12px 26px;border-radius:30px;border:1px solid rgba(255,255,255,.35);cursor:pointer;transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 0 20px rgba(107,160,215,.6)}
+.btn-sm{padding:6px 12px;font-size:12.5px}
+.btn-ghost{background:transparent;border:1px solid #64748B;color:var(--texto-2);box-shadow:none}
+.btn-ghost:hover{color:#fff;border-color:#fff;box-shadow:none}
+.btn-danger{background:#B91C1C;border-color:#FCA5A5}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.table-wrap{overflow-x:auto}
+table.data{width:100%;border-collapse:collapse;background:rgba(15,23,42,.9);border:1px solid var(--borda);margin-top:14px}
+table.data th,table.data td{padding:11px 14px;text-align:left;font-size:13.5px;border-bottom:1px solid rgba(107,160,215,.15);vertical-align:top}
+table.data th{background:var(--surface-2);color:var(--azul);font-family:var(--font-display)}
+table.data tr.row-ativo{background:rgba(107,160,215,.15)}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid}
+.pill.alert{background:rgba(127,29,29,.5);border-color:var(--erro);color:#FECACA}
+.pill.warn{background:rgba(120,53,15,.5);border-color:var(--warn);color:#FDE68A}
+.pill.ok{background:rgba(6,78,59,.5);border-color:var(--ok);color:#A7F3D0}
+.pill.info{background:rgba(30,58,138,.5);border-color:var(--azul);color:#BFDBFE}
+.empty{padding:22px;border:1px dashed var(--borda);border-radius:12px;color:var(--texto-2);text-align:center}
+.dados-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;background:rgba(0,0,0,.4);padding:18px;border-radius:10px;border:1px solid rgba(107,160,215,.2);margin-bottom:24px}
+.dados-grid .k{display:block;color:var(--muda);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+.timeline{display:flex;flex-direction:column;gap:14px;margin-top:14px;padding-left:20px;border-left:2px solid var(--azul);list-style:none}
+.tl-item{background:rgba(0,0,0,.4);border:1px solid rgba(107,160,215,.25);border-radius:10px;padding:14px 16px;position:relative}
+.tl-item::before{content:'';position:absolute;left:-28px;top:18px;width:12px;height:12px;border-radius:50%;background:var(--azul);box-shadow:0 0 10px var(--azul)}
+.tl-date{font-size:12px;color:var(--azul);font-weight:700}
+.tl-title{font-family:var(--font-display);font-size:15px;font-weight:700;margin:2px 0 4px}
+.tl-det{font-size:13.5px;color:var(--texto-2)}
+dialog{background:#0B1220;color:var(--texto);border:1px solid var(--azul);border-radius:14px;padding:24px;max-width:460px;width:calc(100% - 32px);margin:auto}
+dialog::backdrop{background:rgba(0,0,0,.75)}
+dialog h2{font-family:var(--font-display);font-size:18px;color:var(--azul);margin-bottom:10px}
+dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
+#toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:2000;max-width:min(380px,calc(100% - 32px))}
+.toast{padding:12px 16px;border-radius:10px;border:1px solid;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.6);background:#0B1220}
+.toast.ok{border-color:var(--ok);color:#A7F3D0}.toast.erro{border-color:var(--erro);color:#FECACA}.toast.info{border-color:var(--azul);color:#BFDBFE}
+.banner{border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:13.5px;border:1px solid var(--warn);background:rgba(120,53,15,.4);color:#FEF3C7}
 
-        /* Main Title & Logo Box */
-        .title-box {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
-            margin-bottom: 24px;
-        }
+/* 6. RESULTADOS CLÍNICOS */
+.result{padding:20px 22px;border-radius:12px;margin-top:18px;border-left:8px solid;font-size:14.5px;line-height:1.65}
+.result h3{font-family:var(--font-display);margin-bottom:8px;font-size:16px}
+.result ul{padding-left:20px;margin-top:6px}
+.res-alert{background:rgba(127,29,29,.6);border-color:var(--erro);color:#FEE2E2}
+.res-ok{background:rgba(6,78,59,.6);border-color:var(--ok);color:#D1FAE5}
+.res-warn{background:rgba(120,53,15,.6);border-color:var(--warn);color:#FEF3C7}
+.res-info{background:rgba(30,58,138,.6);border-color:var(--azul);color:#E0F2FE}
+.res-max{background:rgba(88,28,135,.7);border-color:#C084FC;color:#F3E8FF}
+.note{background:rgba(30,58,138,.4);border:1px solid var(--azul);border-radius:12px;padding:16px 20px;margin-bottom:20px;font-size:14px;color:#E0F2FE}
+.note ul{padding-left:20px;margin-top:6px}
 
-        .intestine-icon {
-            width: 85px;
-            height: 85px;
-            filter: drop-shadow(0 0 15px rgba(107, 160, 215, 0.6));
-        }
+/* 7. UTILITÁRIOS / RESPONSIVO */
+@media (max-width:768px){
+  .title-tina{font-size:64px}.title-ccr{font-size:56px}.subtitle-main{font-size:15px}.subtitle-sub{font-size:13px}
+  .btn-iniciar{font-size:17px;padding:15px 44px}.tablist{flex-direction:column;width:100%}.tab-btn{width:100%;justify-content:center}
+  .top-brand{font-size:12px;letter-spacing:3px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 
-        .title-tina {
-            font-family: 'Badhorse', 'Cinzel Decorative', serif;
-            font-size: 110px;
-            font-weight: 900;
-            color: #FFFFFF;
-            line-height: 1;
-            letter-spacing: -2px;
-            text-shadow: 0 0 35px rgba(255, 255, 255, 0.2);
-        }
-
-        .title-ccr {
-            font-family: 'Perandory', 'Playfair Display', serif;
-            font-size: 98px;
-            font-weight: 700;
-            color: var(--azul-ccr);
-            line-height: 1;
-            text-shadow: 0 0 30px rgba(107, 160, 215, 0.5);
-        }
-
-        /* Subtitle 1: TRIAGEM E IDENTIFICAÇÃO DE NEOPLASIAS... */
-        .subtitle-cinzel {
-            font-family: 'Cinzel', serif;
-            font-size: 20px;
-            font-weight: 800;
-            color: #FFFFFF;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            max-width: 920px;
-            margin-bottom: 14px;
-            line-height: 1.5;
-        }
-
-        /* Subtitle 2: VERSÃO CÂNCER COLORRETAL */
-        .subtitle-coco {
-            font-family: 'CocoGothic', 'Montserrat', sans-serif;
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--azul-ccr);
-            font-variant: small-caps;
-            letter-spacing: 5px;
-            margin-bottom: 50px;
-        }
-
-        /* Botão Pílula Grande: INICIAR TRIAGEM */
-        .btn-iniciar {
-            background: linear-gradient(135deg, #6BA0D7 0%, #4B66FF 100%);
-            color: #FFFFFF;
-            font-family: 'Badhorse', 'Cinzel Decorative', 'Cinzel', serif;
-            font-size: 22px;
-            font-weight: 800;
-            padding: 18px 64px;
-            border-radius: 60px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 35px rgba(107, 160, 215, 0.6), inset 0 0 12px rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-
-        .btn-iniciar:hover {
-            transform: scale(1.06);
-            box-shadow: 0 0 50px rgba(75, 102, 255, 0.9);
-            background: linear-gradient(135deg, #4B66FF 0%, #6BA0D7 100%);
-        }
-
-        /* -----------------------------------------------------------------
-           MÓDULOS INTERNOS DO APLICATIVO (EXPANDIDOS E REORGANIZADOS)
-        ----------------------------------------------------------------- */
-        .app-section {
-            display: none;
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            max-width: 1320px;
-            margin: 0 auto;
-            padding: 40px 24px 80px 24px;
-        }
-
-        .app-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 24px;
-            border-bottom: 2px solid rgba(107, 160, 215, 0.3);
-            margin-bottom: 35px;
-            gap: 20px;
-        }
-
-        .app-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-        }
-
-        .app-brand .tina-sm {
-            font-family: 'Badhorse', 'Cinzel Decorative', serif;
-            font-size: 32px;
-            font-weight: 800;
-            color: #FFFFFF;
-        }
-
-        .app-brand .ccr-sm {
-            font-family: 'Perandory', 'Playfair Display', serif;
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--azul-ccr);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-
-        .nav-link-btn {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(107, 160, 215, 0.4);
-            color: #E2E8F0;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .nav-link-btn:hover, .nav-link-btn.active {
-            background: var(--azul-ccr);
-            color: #000000;
-            font-weight: 700;
-            border-color: var(--azul-ccr);
-            box-shadow: 0 0 20px rgba(107, 160, 215, 0.5);
-        }
-
-        .btn-home-nav {
-            background: rgba(75, 102, 255, 0.25);
-            border-color: #4B66FF;
-            color: #FFFFFF;
-        }
-
-        .btn-home-nav:hover {
-            background: #4B66FF;
-            color: #FFFFFF;
-        }
-
-        /* Cards & Seções dos Formulários */
-        .card-dark {
-            background: rgba(15, 23, 42, 0.88);
-            border: 1px solid rgba(107, 160, 215, 0.35);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 28px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-        }
-
-        .card-dark h2 {
-            font-family: 'Cinzel', serif;
-            color: var(--azul-ccr);
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(107, 160, 215, 0.2);
-            padding-bottom: 10px;
-        }
-
-        .card-dark h3 {
-            font-family: 'Cinzel', serif;
-            color: #FFFFFF;
-            font-size: 18px;
-            margin-top: 15px;
-            margin-bottom: 14px;
-        }
-
-        /* Checkboxes e Inputs Ampliados */
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 16px;
-            margin-top: 14px;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            background: rgba(3, 7, 18, 0.7);
-            padding: 16px 20px;
-            border-radius: 10px;
-            border: 1px solid rgba(107, 160, 215, 0.25);
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 500;
-            color: #F1F5F9;
-            transition: all 0.2s;
-        }
-
-        .checkbox-item:hover {
-            border-color: var(--azul-ccr);
-            background: rgba(15, 23, 42, 0.9);
-        }
-
-        .checkbox-item input {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--azul-ccr);
-            cursor: pointer;
-        }
-
-        /* Caixa de Resultado e Regras Clínicas */
-        .result-box {
-            padding: 24px 28px;
-            border-radius: 12px;
-            margin-top: 24px;
-            border-left: 8px solid;
-            font-size: 15px;
-            line-height: 1.7;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .res-alert {
-            background: rgba(127, 29, 29, 0.55);
-            border-color: #EF4444;
-            color: #FEE2E2;
-        }
-
-        .res-warning {
-            background: rgba(180, 83, 9, 0.55);
-            border-color: #F59E0B;
-            color: #FEF3C7;
-        }
-
-        .res-success {
-            background: rgba(6, 78, 59, 0.55);
-            border-color: #10B981;
-            color: #D1FAE5;
-        }
-
-        .res-info {
-            background: rgba(30, 58, 138, 0.55);
-            border-color: var(--azul-ccr);
-            color: #E0F2FE;
-        }
-
-        .form-select, .form-input {
-            background: #0F172A;
-            border: 1px solid rgba(107, 160, 215, 0.5);
-            color: #FFFFFF;
-            padding: 12px 18px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            width: 100%;
-            max-width: 360px;
-            margin-top: 8px;
-        }
-
-        .btn-back {
-            background: transparent;
-            border: 1px solid #64748B;
-            color: #94A3B8;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-bottom: 24px;
-            transition: all 0.2s;
-        }
-
-        .btn-back:hover {
-            color: #FFFFFF;
-            border-color: #FFFFFF;
-        }
-
-        /* Cards Estatísticos da Aba de Dados */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .kpi-card {
-            background: rgba(15, 23, 42, 0.95);
-            border: 1px solid var(--border-glow);
-            border-radius: 14px;
-            padding: 24px;
-            text-align: center;
-        }
-
-        .kpi-num {
-            font-family: 'Cinzel', serif;
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--azul-ccr);
-            margin-bottom: 6px;
-        }
-
-        .kpi-label {
-            font-size: 13px;
-            color: #94A3B8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        /* Tabela Completa da Linha do Cuidado no SUS */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid var(--border-glow);
-            margin-top: 20px;
-        }
-
-        .data-table th, .data-table td {
-            padding: 16px 20px;
-            text-align: left;
-            font-size: 14px;
-            border-bottom: 1px solid rgba(107, 160, 215, 0.15);
-            line-height: 1.5;
-        }
-
-        .data-table th {
-            background-color: #0B1329;
-            color: var(--azul-ccr);
-            font-family: 'Cinzel', serif;
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        @media (max-width: 768px) {
-            .title-tina { font-size: 68px; }
-            .title-ccr { font-size: 60px; }
-            .subtitle-cinzel { font-size: 15px; }
-            .subtitle-coco { font-size: 13px; }
-            .btn-iniciar { font-size: 18px; padding: 16px 44px; }
-            .app-nav { flex-direction: column; align-items: flex-start; }
-        }
-    </style>
+/* 8. IMPRESSÃO (prontuário) */
+.print-only{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  .glow-bg,.no-print,.app-nav,.patient-bar,.app-footer,#toasts,.home{display:none!important}
+  .app{display:block!important;padding:0}
+  .tab-panel{display:none!important}
+  body.print-prontuario #tab-prontuario{display:block!important}
+  .card,.result,.tl-item,.dados-grid{background:#fff!important;color:#000!important;border:1px solid #444!important;box-shadow:none!important;backdrop-filter:none!important}
+  .card h2,.tl-title,.tl-date,.result h3{color:#000!important}
+  .tl-det,.dados-grid .k{color:#222!important}
+  .print-only{display:block;margin-bottom:12px;font-size:12px;color:#000}
+  .timeline{border-left:2px solid #000}.tl-item::before{background:#000;box-shadow:none}
+}
+</style>
 </head>
+
 <body>
+<a class="skip-link" href="#conteudo">Ir para o conteúdo principal</a>
 
-    <!-- Ambient Blue Glow -->
-    <div class="glow-bg"></div>
+<!-- Ícones (sprite SVG) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4 19a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-6-10V3"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol>
+</svg>
 
-    <!-- TELA INICIAL (DESIGN EXATO DO CANVA - SLIDE 1) -->
-    <div id="screen-home" class="screen-container">
-        <!-- Top Brand: UNICAMP COTUCA -->
-        <div class="top-brand">
-            UNICAMP<br>COTUCA
+<div class="glow-bg" aria-hidden="true"></div>
+
+<!-- ============================ TELA INICIAL ============================ -->
+<section id="screen-home" class="home" aria-label="Tela inicial">
+  <div class="top-brand">UNICAMP &nbsp;•&nbsp; COTUCA</div>
+  <div class="title-box">
+    <svg class="intestine-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path d="M20 16C20 12.7 22.7 10 26 10H38C41.3 10 44 12.7 44 16V18C44 21.3 41.3 24 38 24H26C22.7 24 20 26.7 20 30V32C20 35.3 22.7 38 26 38H38C41.3 38 44 40.7 44 44V46C44 49.3 41.3 52 38 52H32" stroke="#6BA0D7" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="32" cy="52" r="3.5" fill="#6BA0D7"/>
+    </svg>
+    <h1 style="display:contents"><span class="title-tina">TINA</span><span class="title-ccr">CCR</span><span class="sr-only"> — Triagem e Identificação de Neoplasias na Atenção Primária à Saúde</span></h1>
+  </div>
+  <p class="subtitle-main">Triagem e Identificação de Neoplasias na Atenção Primária à Saúde</p>
+  <p class="subtitle-sub">Versão Câncer Colorretal</p>
+  <button type="button" class="btn-iniciar" id="btn-iniciar">Iniciar triagem</button>
+  <p class="home-aviso">Ferramenta de apoio à decisão para profissionais de enfermagem da Atenção Primária. Não substitui a avaliação clínica nem os protocolos locais. Projeto acadêmico: não utilize dados reais de pacientes sem a devida autorização institucional e adequação à LGPD.</p>
+</section>
+
+<!-- ============================ SISTEMA ============================ -->
+<div id="screen-app" class="app">
+
+  <div id="storage-banner" class="banner" role="alert" hidden></div>
+
+  <div class="patient-bar" id="patient-banner">
+    <div class="patient-info">
+      <span class="badge-ativo">Paciente ativo</span>
+      <div>
+        <strong id="active-name" style="font-size:16px">Nenhum paciente selecionado</strong>
+        <div class="patient-meta">
+          CNS: <span id="active-cns">—</span> &nbsp;|&nbsp; CPF: <span id="active-cpf">—</span> &nbsp;|&nbsp;
+          Idade: <strong id="active-age" style="color:var(--azul)">—</strong> &nbsp;|&nbsp; eSF: <span id="active-esf">—</span>
         </div>
-
-        <!-- Main Title & Logo Box -->
-        <div class="title-box">
-            <svg class="intestine-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 16C20 12.6863 22.6863 10 26 10H38C41.3137 10 44 12.6863 44 16V18C44 21.3137 41.3137 24 38 24H26C22.6863 24 20 26.6863 20 30V32C20 35.3137 22.6863 38 26 38H38C41.3137 38 44 40.6863 44 44V46C44 49.3137 41.3137 52 38 52H32" stroke="#6BA0D7" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="32" cy="52" r="3.5" fill="#6BA0D7"/>
-            </svg>
-            <span class="title-tina">TINA</span>
-            <span class="title-ccr">CCR</span>
-        </div>
-
-        <!-- Subtitles -->
-        <div class="subtitle-cinzel">TRIAGEM E IDENTIFICAÇÃO DE NEOPLASIAS NA ATENÇÃO PRIMÁRIA À SAÚDE</div>
-        <div class="subtitle-coco">VERSÃO CÂNCER COLORRETAL</div>
-
-        <!-- Botão Único para Iniciar -->
-        <button class="btn-iniciar" onclick="startApp()">INICIAR TRIAGEM</button>
+      </div>
     </div>
+    <button type="button" class="btn btn-ghost btn-sm" data-goto="cadastro"><svg class="ic"><use href="#i-swap"/></svg>Selecionar / trocar paciente</button>
+  </div>
 
-    <!-- MÓDULOS INTERNOS DO APLICATIVO -->
-    <div id="screen-app" class="app-section">
-        <div class="app-nav">
-            <div class="app-brand" onclick="goHome()">
-                <span class="tina-sm">TINA</span>
-                <span class="ccr-sm">CCR</span>
-            </div>
-            <div class="nav-links">
-                <button class="nav-link-btn active" onclick="showModule('triagem-risco', this)">📋 1. Triagem e Avaliação de Risco</button>
-                <button class="nav-link-btn" onclick="showModule('sof', this)">🧪 2. Exame de Sangue Oculto (SOF)</button>
-                <button class="nav-link-btn" onclick="showModule('dashboard', this)">📊 3. Contexto, Dados & Matriz SUS</button>
-                <button class="nav-link-btn btn-home-nav" onclick="goHome()">🏠 Início</button>
-            </div>
-        </div>
-
-        <!-- MÓDULO COMBINADO: TRIAGEM DE SINTOMAS + AVALIAÇÃO DE RISCO -->
-        <div id="mod-triagem-risco" class="module-content">
-            <button class="btn-back" onclick="goHome()">← Voltar à Tela Inicial</button>
-
-            <!-- ETAPA A: TRIAGEM DE SINTOMAS -->
-            <div class="card-dark">
-                <h2>Etapa A: Triagem de Sintomas de Alerta (Acolhimento na UBS)</h2>
-                <p style="color: #94A3B8; font-size: 15px; margin-bottom: 18px;">
-                    Assinale os sinais e sintomas identificados durante a anamnese do paciente:
-                </p>
-                <div class="checkbox-grid">
-                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalTriagemERisco()"> Afinamento das fezes</label>
-                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalTriagemERisco()"> Sensação de evacuação incompleta (tenesmo)</label>
-                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalTriagemERisco()"> Flatulência excessiva e/ou cólica constante</label>
-                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalTriagemERisco()"> Presença de sangue vivo nas fezes</label>
-                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalTriagemERisco()"> Sangramento retal frequente</label>
-                    <label class="checkbox-item"><input type="checkbox" class="sintoma-check sint-check" onchange="evalTriagemERisco()"> Perda de peso inexplicada</label>
-                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalTriagemERisco()"> Distensão abdominal inexplicada</label>
-                    <label class="checkbox-item"><input type="checkbox" class="sint-check" onchange="evalTriagemERisco()"> Anemia de origem não esclarecida</label>
-                </div>
-            </div>
-
-            <!-- ETAPA B: AVALIAÇÃO DE RISCO E ELEGIBILIDADE -->
-            <div class="card-dark">
-                <h2>Etapa B: Avaliação de Risco e Elegibilidade</h2>
-                
-                <div style="margin-bottom: 24px;">
-                    <label style="font-size: 15px; font-weight: 600;">Idade do paciente (anos):</label><br>
-                    <input type="number" id="input-idade" class="form-input" value="52" min="18" max="110" onchange="evalTriagemERisco()">
-                </div>
-
-                <h3>Fatores Hereditários e Condições Clínicas de Alto Risco:</h3>
-                <div class="checkbox-grid">
-                    <label class="checkbox-item"><input type="checkbox" class="risco-check" onchange="evalTriagemERisco()"> Polipose Adenomatosa Familiar (FAP)</label>
-                    <label class="checkbox-item"><input type="checkbox" class="risco-check" onchange="evalTriagemERisco()"> Síndrome de Lynch (CCRRNP)</label>
-                    <label class="checkbox-item"><input type="checkbox" class="risco-check" onchange="evalTriagemERisco()"> Doença Inflamatória Intestinal (Colite Ulcerativa / Crohn)</label>
-                    <label class="checkbox-label checkbox-item"><input type="checkbox" class="risco-check" onchange="evalTriagemERisco()"> Diabetes Tipo 2</label>
-                    <label class="checkbox-item"><input type="checkbox" class="risco-check" onchange="evalTriagemERisco()"> Radiação ionizante abdominal/pélvica prévia</label>
-                </div>
-            </div>
-
-            <!-- CAIXA DE RESULTADO E DIRETRIZ CLÍNICA -->
-            <div id="res-triagem-risco"></div>
-        </div>
-
-        <!-- MÓDULO 2: SANGUE OCULTO (SOF) -->
-        <div id="mod-sof" class="module-content" style="display: none;">
-            <div class="card-dark">
-                <h2>2. Registro e Conduta do Teste de Sangue Oculto nas Fezes</h2>
-                <div style="margin-bottom: 20px;">
-                    <label style="font-size: 15px; font-weight: 600;">Selecione o teste de sangue oculto realizado:</label><br>
-                    <select id="select-teste" class="form-select" onchange="evalSOF()">
-                        <option value="FIT">FIT (Teste Imunoquímico Fecal) - Preferencial</option>
-                        <option value="g-FOBT">g-FOBT (Teste por Guaiaco) - Alternativa</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size: 15px; font-weight: 600;">Resultado do Exame:</label><br>
-                    <select id="select-resultado" class="form-select" onchange="evalSOF()">
-                        <option value="negativo">Negativo (-)</option>
-                        <option value="positivo">Positivo (+)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="res-sof"></div>
-        </div>
-
-        <!-- MÓDULO 3: DADOS, CONTEXTO E MATRIZ SUS REORGANIZADA -->
-        <div id="mod-dashboard" class="module-content" style="display: none;">
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-num">53.810</div>
-                    <div class="kpi-label">Novos Casos/Ano (INCA)</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-num">25,11</div>
-                    <div class="kpi-label">Taxa por 100 mil hab.</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-num">55% - 70%</div>
-                    <div class="kpi-label">Diagnóstico Tardio no BR</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-num">8,5%</div>
-                    <div class="kpi-label">Mortalidade Fase Inicial</div>
-                </div>
-            </div>
-
-            <div class="card-dark">
-                <h2>Fundamentação Clínica & Fisiopatologia</h2>
-                <p style="font-size: 15px; line-height: 1.7; color: #CBD5E1;">
-                    • <strong>Sequência Adenoma-Carcinoma:</strong> O Câncer Colorretal origina-se de mutações genéticas nas células da mucosa intestinal que formam pólipos adenomatosos. O crescimento é lento, permitindo interrupção prévia.<br>
-                    • <strong>Inversão do Diagnóstico Tardio:</strong> A idade média ao diagnóstico no Brasil é de 64 anos (fase avançada). O rastreamento na APS identifica lesões antes do surgimento de sintomas graves.<br>
-                    • <strong>Atuação da Enfermagem:</strong> A consulta privativa do enfermeiro e a busca ativa na UBS são as principais estratégias para ampliar a cobertura do Teste Imunoquímico Fecal (FIT).
-                </p>
-            </div>
-
-            <div class="card-dark">
-                <h2>Matriz Completa da Linha do Cuidado no SUS</h2>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Etapa do Protocolo</th>
-                            <th>Perfil do Paciente</th>
-                            <th>Conduta da Enfermagem na APS</th>
-                            <th>Encaminhamento / Regulação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>1. Acolhimento & Triagem</strong></td>
-                            <td>População geral da UBS</td>
-                            <td>Anamnese e contagem de sintomas de alerta</td>
-                            <td>APS / Atenção Secundária</td>
-                        </tr>
-                        <tr>
-                            <td><strong>2. Sintomas Leves (1-2)</strong></td>
-                            <td>Sintomático brando</td>
-                            <td>Solicitação do FIT (Sangue Oculto)</td>
-                            <td>Laboratório / UBS</td>
-                        </tr>
-                        <tr>
-                            <td><strong>3. Sintomas de Alerta (≥3)</strong></td>
-                            <td>Mais de 3 sintomas de alerta</td>
-                            <td>Encaminhamento imediato urgente</td>
-                            <td>Atenção Secundária (Colonoscopia)</td>
-                        </tr>
-                        <tr>
-                            <td><strong>4. Alto Risco Hereditário</strong></td>
-                            <td>FAP, Lynch, DII, Diabetes tipo 2</td>
-                            <td>Regulação especializada direta</td>
-                            <td>Gastroenterologia Secundária</td>
-                        </tr>
-                        <tr>
-                            <td><strong>5. Rastreio de Rotina</strong></td>
-                            <td>Assintomático ≥ 50 anos</td>
-                            <td>Busca ativa e solicitação do FIT</td>
-                            <td>Acompanhamento na UBS</td>
-                        </tr>
-                        <tr>
-                            <td><strong>6. FIT Positivo (+)</strong></td>
-                            <td>Sangue oculto detectado</td>
-                            <td>Encaminhamento obrigatório para endoscopia</td>
-                            <td>Regulação Colonoscopia</td>
-                        </tr>
-                        <tr>
-                            <td><strong>7. Neoplasia Confirmada</strong></td>
-                            <td>Confirmação por biópsia</td>
-                            <td>Acompanhamento do plano terapêutico</td>
-                            <td>Atenção Terciária (Oncologia)</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  <nav class="app-nav" aria-label="Navegação principal">
+    <button type="button" class="app-brand" id="btn-home" aria-label="Voltar à tela inicial do TINA CCR">
+      <span class="tina-sm">TINA</span><span class="ccr-sm">CCR</span>
+    </button>
+    <div class="tablist" role="tablist" aria-label="Módulos do sistema">
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-cadastro" aria-controls="tab-cadastro" aria-selected="true" data-tab="cadastro"><svg class="ic"><use href="#i-user"/></svg>1. Cadastro e-SUS / CNS</button>
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-triagem" aria-controls="tab-triagem" aria-selected="false" tabindex="-1" data-tab="triagem"><svg class="ic"><use href="#i-clip"/></svg>2. Triagem e risco</button>
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-exames" aria-controls="tab-exames" aria-selected="false" tabindex="-1" data-tab="exames"><svg class="ic"><use href="#i-flask"/></svg>3. Lançamento de exames</button>
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-prontuario" aria-controls="tab-prontuario" aria-selected="false" tabindex="-1" data-tab="prontuario"><svg class="ic"><use href="#i-folder"/></svg>4. Prontuário eletrônico</button>
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-diretrizes" aria-controls="tab-diretrizes" aria-selected="false" tabindex="-1" data-tab="diretrizes"><svg class="ic"><use href="#i-table"/></svg>5. Diretrizes e matriz SUS</button>
     </div>
+  </nav>
 
-    <!-- Script com as Novas Regras Clínicas -->
-    <script>
-        function startApp() {
-            document.getElementById('screen-home').style.display = 'none';
-            document.getElementById('screen-app').style.display = 'block';
-            evalTriagemERisco();
-            evalSOF();
-        }
+  <main id="conteudo">
 
-        function goHome() {
-            document.getElementById('screen-app').style.display = 'none';
-            document.getElementById('screen-home').style.display = 'flex';
-        }
+    <!-- ABA 1 · CADASTRO -->
+    <section id="tab-cadastro" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-cadastro" tabindex="0">
+      <div class="card">
+        <h2 id="cad-titulo">1. Cadastro do paciente (e-SUS APS / Cartão Nacional de Saúde)</h2>
+        <p class="lead">Campos com <span class="req" aria-hidden="true">*</span><span class="sr-only">asterisco</span> são obrigatórios. CPF e CNS são validados pelos dígitos verificadores.</p>
+        <form id="form-cadastro" novalidate>
+          <input type="hidden" id="cad-id">
+          <div class="form-grid">
+            <div class="field"><label for="cad-nome">Nome completo <span class="req">*</span></label>
+              <input id="cad-nome" class="control" type="text" autocomplete="off" maxlength="120" aria-describedby="err-cad-nome" required>
+              <span class="err" id="err-cad-nome"></span></div>
+            <div class="field"><label for="cad-cns">Cartão Nacional de Saúde (CNS) <span class="req">*</span></label>
+              <input id="cad-cns" class="control" type="text" inputmode="numeric" autocomplete="off" placeholder="000 0000 0000 0000" maxlength="18" aria-describedby="err-cad-cns" required>
+              <span class="err" id="err-cad-cns"></span></div>
+            <div class="field"><label for="cad-cpf">CPF <span class="req">*</span></label>
+              <input id="cad-cpf" class="control" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14" aria-describedby="err-cad-cpf" required>
+              <span class="err" id="err-cad-cpf"></span></div>
+            <div class="field"><label for="cad-nasc">Data de nascimento <span class="req">*</span></label>
+              <input id="cad-nasc" class="control" type="date" aria-describedby="err-cad-nasc" required>
+              <span class="err" id="err-cad-nasc"></span></div>
+            <div class="field"><label for="cad-sexo">Sexo <span class="req">*</span></label>
+              <select id="cad-sexo" class="control" aria-describedby="err-cad-sexo" required>
+                <option value="">Selecione…</option><option>Feminino</option><option>Masculino</option><option>Outro</option>
+              </select><span class="err" id="err-cad-sexo"></span></div>
+            <div class="field"><label for="cad-esf">Equipe de Saúde da Família (eSF) — opcional</label>
+              <input id="cad-esf" class="control" type="text" maxlength="80" placeholder="Deixe em branco se não houver"></div>
+            <div class="field"><label for="cad-ubs">Unidade Básica de Saúde (UBS) — opcional</label>
+              <input id="cad-ubs" class="control" type="text" maxlength="80" placeholder="Deixe em branco se não houver"></div>
+            <div class="field"><label for="cad-tel">Telefone / WhatsApp</label>
+              <input id="cad-tel" class="control" type="tel" inputmode="tel" maxlength="15" placeholder="(19) 99999-9999" aria-describedby="err-cad-tel">
+              <span class="err" id="err-cad-tel"></span></div>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn" id="btn-salvar-cad"><svg class="ic"><use href="#i-save"/></svg><span id="btn-salvar-cad-txt">Salvar cadastro e iniciar atendimento</span></button>
+            <button type="button" class="btn btn-ghost" id="btn-cancelar-edicao" hidden>Cancelar edição</button>
+          </div>
+        </form>
+      </div>
 
-        function showModule(modId, btnEl) {
-            document.querySelectorAll('.module-content').forEach(m => m.style.display = 'none');
-            document.querySelectorAll('.nav-link-btn').forEach(b => b.classList.remove('active'));
+      <div class="card">
+        <h3>Pacientes cadastrados na unidade</h3>
+        <div class="field" style="margin-bottom:6px">
+          <label for="search-paciente">Buscar por nome, CNS ou CPF</label>
+          <input id="search-paciente" class="control" type="search" placeholder="Digite para filtrar…" autocomplete="off">
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <caption class="sr-only">Lista de pacientes cadastrados</caption>
+            <thead><tr><th scope="col">Nome</th><th scope="col">CNS</th><th scope="col">CPF</th><th scope="col">Idade</th><th scope="col">eSF / UBS</th><th scope="col">Status do cuidado</th><th scope="col">Ações</th></tr></thead>
+            <tbody id="tbody-pacientes"></tbody>
+          </table>
+        </div>
+      </div>
 
-            document.getElementById('mod-' + modId).style.display = 'block';
-            if (btnEl) btnEl.classList.add('active');
-        }
+      <div class="card no-print">
+        <h3>Dados e privacidade (LGPD)</h3>
+        <p class="lead">Os dados ficam salvos <strong>somente neste navegador e neste dispositivo</strong> (armazenamento local). Não são enviados a nenhum servidor. Faça cópias de segurança com frequência e proteja o equipamento. Dados de saúde são dados pessoais sensíveis (Lei nº 13.709/2018).</p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-ghost" id="btn-export"><svg class="ic"><use href="#i-down"/></svg>Exportar cópia (JSON)</button>
+          <button type="button" class="btn btn-ghost" id="btn-import"><svg class="ic"><use href="#i-up"/></svg>Importar cópia</button>
+          <input type="file" id="file-import" accept="application/json,.json" hidden>
+          <button type="button" class="btn btn-danger" id="btn-clear"><svg class="ic"><use href="#i-trash"/></svg>Apagar todos os dados</button>
+        </div>
+      </div>
+    </section>
 
-        /* NOVA REGRA CLÍNICA:
-           - 1 a 2 sintomas -> Realização do FIT (Sangue Oculto)
-           - 3 ou mais sintomas (mais de 2) -> Encaminhamento imediato para Atenção Secundária
-        */
-        function evalTriagemERisco() {
-            // Contagem de sintomas
-            const sintChecks = document.querySelectorAll('.sint-check');
-            let sintCount = 0;
-            sintChecks.forEach(c => { if (c.checked) sintCount++; });
+    <!-- ABA 2 · TRIAGEM -->
+    <section id="tab-triagem" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-triagem" tabindex="0" hidden>
+      <div class="card">
+        <h2>2. Triagem clínica e estratificação de risco</h2>
+        <div id="triagem-vazio" class="empty" hidden>Nenhum paciente ativo. Selecione ou cadastre um paciente na aba <strong>1. Cadastro</strong> para realizar a triagem.</div>
+        <div id="triagem-corpo">
+          <form id="form-triagem" novalidate>
+            <fieldset>
+              <legend style="color:var(--azul)">Etapa A — Acolhimento e avaliação de sinais e sintomas</legend>
+              <p class="hint">Marque <strong>assintomático</strong> ou os sinais de alerta presentes.</p>
+              <div class="check-grid">
+                <label class="check assint"><input type="checkbox" id="chk-assint"><span>PACIENTE ASSINTOMÁTICO (nenhum sinal de alerta presente)</span></label>
+                <label class="check"><input type="checkbox" class="chk-sint" value="Alteração do hábito intestinal (fezes afinadas, tenesmo ou cólica persistente)"><span>Fezes afinadas, tenesmo ou cólica persistente</span></label>
+                <label class="check"><input type="checkbox" class="chk-sint" value="Sangue vivo nas fezes ou sangramento retal"><span>Sangue vivo nas fezes ou sangramento retal</span></label>
+                <label class="check"><input type="checkbox" class="chk-sint" value="Perda de peso inexplicada, anemia sem causa esclarecida ou distensão abdominal"><span>Perda de peso inexplicada, anemia de origem não esclarecida ou distensão abdominal</span></label>
+              </div>
+            </fieldset>
 
-            // Idade e Alto Risco
-            const idade = parseInt(document.getElementById('input-idade').value) || 0;
-            const riscoChecks = document.querySelectorAll('.risco-check');
-            let isAltoRisco = false;
-            riscoChecks.forEach(c => { if (c.checked) isAltoRisco = true; });
+            <fieldset style="margin-top:26px">
+              <legend style="color:var(--warn)">Etapa B — Alto risco (hereditário ou clínico)</legend>
+              <p class="hint">Pessoas nestas condições não seguem o rastreamento populacional com FIT: seguem protocolo específico.</p>
+              <div class="check-grid">
+                <label class="check"><input type="checkbox" class="chk-risco" value="Síndrome de Lynch ou polipose adenomatosa familiar (FAP) — pessoal ou familiar"><span>Síndrome de Lynch (CCRNP) ou Polipose Adenomatosa Familiar (FAP) — diagnóstico pessoal ou familiar</span></label>
+                <label class="check"><input type="checkbox" class="chk-risco" value="Doença inflamatória intestinal (colite ulcerativa ou doença de Crohn)"><span>Doença Inflamatória Intestinal (colite ulcerativa ou doença de Crohn)</span></label>
+                <label class="check"><input type="checkbox" class="chk-risco" value="Histórico familiar de câncer colorretal em parente de 1º grau"><span>Histórico familiar de câncer colorretal em parente de 1º grau</span></label>
+                <label class="check"><input type="checkbox" class="chk-risco" value="Histórico pessoal de câncer colorretal ou de pólipos adenomatosos"><span>Histórico pessoal de câncer colorretal ou de pólipos adenomatosos</span></label>
+              </div>
+            </fieldset>
 
-            const resDiv = document.getElementById('res-triagem-risco');
+            <fieldset style="margin-top:26px">
+              <legend>Fatores associados (registro; não alteram a classificação)</legend>
+              <div class="check-grid">
+                <label class="check"><input type="checkbox" class="chk-fator" value="Diabetes tipo 2"><span>Diabetes tipo 2</span></label>
+                <label class="check"><input type="checkbox" class="chk-fator" value="Radioterapia/radiação abdominal ou pélvica prévia"><span>Radiação ionizante abdominal/pélvica prévia</span></label>
+              </div>
+            </fieldset>
+            <div class="err" id="err-triagem" role="alert" style="margin-top:12px"></div>
+          </form>
 
-            // 1. Paciente com 3 ou mais sintomas -> Encaminhamento imediato
-            if (sintCount >= 3) {
-                resDiv.innerHTML = `
-                    <div class="result-box res-alert">
-                        <h3 style="font-family: 'Cinzel', serif; font-size: 18px; margin-bottom: 8px;">🚨 ATENÇÃO: PACIENTE COM ${sintCount} SINTOMAS DE ALERTA (MAIS DE 3 SINTOMAS)</h3>
-                        <p><strong>Diretriz Clínica de Conduta Imediata:</strong></p>
-                        <p>Devido à presença de múltiplos sinais de alerta (${sintCount} sintomas marcados), o paciente apresenta alta suspeição clínica.</p>
-                        <p><strong>Ação Obrigatória: Encaminhamento DIRETO e IMEDIATO para a Atenção Secundária</strong> para investigação endoscópica (Colonoscopia / Retossigmoidoscopia com biópsia), sem aguardar teste de sangue oculto.</p>
-                    </div>
-                `;
-            } 
-            // 2. Paciente com 1 ou 2 sintomas -> Indicação do FIT (Sangue Oculto)
-            else if (sintCount >= 1 && sintCount <= 2) {
-                resDiv.innerHTML = `
-                    <div class="result-box res-warning">
-                        <h3 style="font-family: 'Cinzel', serif; font-size: 18px; margin-bottom: 8px;">⚠️ SINTOMAS LEVES IDENTIFICADOS (${sintCount} SINTOMA(S))</h3>
-                        <p><strong>Diretriz Clínica de Conduta:</strong></p>
-                        <p>Paciente apresenta sintomas brandos (1 a 2 sinais de alerta).</p>
-                        <p><strong>Ação Recomendada: Direcionar para a realização imediata do Teste Imunoquímico Fecal (FIT)</strong> para pesquisa de sangue oculto nas fezes na UBS. Se o FIT for positivo (+), encaminhar para colonoscopia.</p>
-                    </div>
-                `;
-            } 
-            // 3. Assintomático + Alto Risco Hereditário
-            else if (isAltoRisco) {
-                resDiv.innerHTML = `
-                    <div class="result-box res-warning">
-                        <h3 style="font-family: 'Cinzel', serif; font-size: 18px; margin-bottom: 8px;">🚨 ALTO RISCO HEREDITÁRIO OU CLÍNICO</h3>
-                        <p>Paciente assintomático, porém com antecedentes de FAP, Síndrome de Lynch, DII ou Diabetes Tipo 2.</p>
-                        <p><strong>Conduta: Encaminhamento direto para Gastroenterologia / Colonoscopia na Atenção Secundária</strong>, independente da idade.</p>
-                    </div>
-                `;
-            } 
-            // 4. Assintomático < 50 anos
-            else if (idade < 50) {
-                resDiv.innerHTML = `
-                    <div class="result-box res-info">
-                        <h3 style="font-family: 'Cinzel', serif; font-size: 18px; margin-bottom: 8px;">ℹ️ FORA DA FAIXA ETÁRIA DE RASTREIO DE ROTINA (&lt; 50 ANOS)</h3>
-                        <p>Paciente assintomático e sem alto risco hereditário.</p>
-                        <p><strong>Conduta:</strong> Manter acompanhamento na UBS e realizar ações de educação em saúde (estímulo ao consumo de fibras, atividade física e prevenção do tabagismo/álcool).</p>
-                    </div>
-                `;
-            } 
-            // 5. Assintomático ≥ 50 anos -> Rastreio de Rotina com FIT
-            else {
-                resDiv.innerHTML = `
-                    <div class="result-box res-success">
-                        <h3 style="font-family: 'Cinzel', serif; font-size: 18px; margin-bottom: 8px;">✅ PACIENTE ELEGÍVEL PARA RASTREAMENTO DE ROTINA (Assintomático, Idade ≥ 50 anos)</h3>
-                        <p><strong>Diretriz de Solicitação:</strong></p>
-                        <p>Solicitar <strong>FIT (Teste Imunoquímico Fecal)</strong> como opção preferencial (sem necessidade de restrição alimentar prévia) ou <strong>g-FOBT</strong> como alternativa na indisponibilidade do FIT.</p>
-                    </div>
-                `;
-            }
-        }
+          <div id="resultado-triagem" aria-live="polite"></div>
+          <div class="btn-row" style="margin-top:22px">
+            <button type="button" class="btn" id="btn-salvar-triagem"><svg class="ic"><use href="#i-save"/></svg>Salvar triagem no prontuário</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        function evalSOF() {
-            const teste = document.getElementById('select-teste').value;
-            const res = document.getElementById('select-resultado').value;
-            const resDiv = document.getElementById('res-sof');
+    <!-- ABA 3 · EXAMES -->
+    <section id="tab-exames" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-exames" tabindex="0" hidden>
+      <div class="note">
+        <strong><svg class="ic"><use href="#i-info"/></svg> Lembrete clínico (APS / SISREG)</strong>
+        <ul>
+          <li>O <strong>FIT</strong> é o teste de referência no SUS para <strong>assintomáticos de 50 a 75 anos</strong> (a cada 2 anos). Não é indicado para investigar quem já tem sintomas.</li>
+          <li>Resultado <strong>positivo</strong> no FIT: encaminhar para <strong>colonoscopia</strong> (Atenção Especializada, via regulação).</li>
+          <li>Colonoscopia <strong>normal</strong> em risco habitual: repetir apenas após <strong>10 anos</strong>. Retossigmoidoscopia normal: <strong>5 anos</strong> (SBOC). Alto risco segue protocolo específico.</li>
+        </ul>
+      </div>
 
-            if (res === 'positivo') {
-                resDiv.innerHTML = `
-                    <div class="result-box res-alert">
-                        <h3 style="font-family: 'Cinzel', serif; font-size: 18px; margin-bottom: 8px;">🚨 SANGUE OCULTO POSITIVO (${teste})</h3>
-                        <p>Foi detectado sangramento ativo no trato gastrointestinal.</p>
-                        <p><strong>Conduta Obrigatoria da Enfermagem:</strong> Agendar retorno e regular o paciente para a <strong>Atenção Secundária para realização de Colonoscopia</strong>.</p>
-                    </div>
-                `;
-            } else {
-                resDiv.innerHTML = `
-                    <div class="result-box res-success">
-                        <h3 style="font-family: 'Cinzel', serif; font-size: 18px; margin-bottom: 8px;">✅ SANGUE OCULTO NEGATIVO</h3>
-                        <p>Resultado normal. Registrar no prontuário da UBS e manter o paciente na rotina de busca ativa periódica da equipe de enfermagem.</p>
-                    </div>
-                `;
-            }
-        }
-    </script>
+      <div class="card">
+        <h2>3. Lançamento e laudo de exames</h2>
+        <div id="exames-vazio" class="empty" hidden>Nenhum paciente ativo. Selecione um paciente na aba <strong>1. Cadastro</strong>.</div>
+        <div id="exames-corpo">
+          <form id="form-exame" novalidate>
+            <div class="form-grid">
+              <div class="field"><label for="exame-tipo">Exame realizado <span class="req">*</span></label>
+                <select id="exame-tipo" class="control">
+                  <option value="FIT">SOF — FIT (imunoquímico) — preferencial</option>
+                  <option value="g-FOBT">SOF — g-FOBT (guaiaco) — método anterior; usar só se FIT indisponível</option>
+                  <option value="Colonoscopia">Colonoscopia (Atenção Especializada)</option>
+                  <option value="Retossigmoidoscopia">Retossigmoidoscopia (Atenção Especializada)</option>
+                </select></div>
+              <div class="field"><label for="exame-resultado">Resultado / laudo <span class="req">*</span></label>
+                <select id="exame-resultado" class="control"></select></div>
+              <div class="field"><label for="exame-data">Data de realização <span class="req">*</span></label>
+                <input id="exame-data" class="control" type="date" aria-describedby="err-exame-data">
+                <span class="err" id="err-exame-data"></span></div>
+            </div>
+            <div class="field" style="margin-bottom:18px">
+              <label for="exame-obs">Observações do laboratório ou endoscopista</label>
+              <textarea id="exame-obs" class="control" rows="3" maxlength="1000" placeholder="Detalhes do laudo, histopatológico ou observações…"></textarea>
+            </div>
+            <div id="preview-exame" aria-live="polite" style="margin-bottom:20px"></div>
+            <button type="submit" class="btn"><svg class="ic"><use href="#i-save"/></svg>Salvar resultado no prontuário</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 4 · PRONTUÁRIO -->
+    <section id="tab-prontuario" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-prontuario" tabindex="0" hidden>
+      <div id="prontuario-alerta" aria-live="polite"></div>
+      <div class="card">
+        <h2>4. Prontuário eletrônico do paciente (e-SUS APS)</h2>
+        <p class="print-only" id="print-cabecalho"></p>
+        <div id="prontuario-vazio" class="empty" hidden>Nenhum paciente ativo. Selecione um paciente na aba <strong>1. Cadastro</strong>.</div>
+        <div id="prontuario-corpo">
+          <div class="btn-row no-print" style="margin-bottom:16px">
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-print"><svg class="ic"><use href="#i-print"/></svg>Imprimir prontuário</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-export-um"><svg class="ic"><use href="#i-down"/></svg>Exportar este paciente (JSON)</button>
+          </div>
+          <div class="dados-grid" id="prontuario-dados"></div>
+          <h3>Triagem registrada</h3>
+          <div id="prontuario-triagem" style="margin-bottom:22px"></div>
+          <h3>Exames lançados</h3>
+          <div class="table-wrap" id="prontuario-exames" style="margin-bottom:22px"></div>
+          <h3>Linha do tempo assistencial</h3>
+          <ol class="timeline" id="timeline"></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 5 · DIRETRIZES -->
+    <section id="tab-diretrizes" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-diretrizes" tabindex="0" hidden>
+      <div class="card">
+        <h2>5. Matriz de navegação e diretrizes clínicas no SUS</h2>
+        <p class="lead">Matriz operacional da linha de cuidado do câncer colorretal na Atenção Primária, conforme as fontes listadas ao final da página.</p>
+        <div class="table-wrap">
+          <table class="data">
+            <caption class="sr-only">Matriz de navegação do câncer colorretal</caption>
+            <thead><tr><th scope="col">Etapa</th><th scope="col">Condição clínico-demográfica</th><th scope="col">Ação principal da enfermagem</th><th scope="col">Destino / regulação</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">1. Acolhimento</th><td>População adscrita à UBS</td><td>Busca ativa, anamnese e avaliação de sinais e sintomas</td><td>Atenção Primária (UBS)</td></tr>
+              <tr><th scope="row">Sintomático (sinais de alerta)</th><td>Sangramento retal, alteração do hábito intestinal, perda de peso, anemia</td><td>Acionar o médico da equipe e encaminhar para investigação diagnóstica (FIT não se aplica)</td><td><strong>Atenção Especializada</strong> (colonoscopia preferencial)</td></tr>
+              <tr><th scope="row">Alto risco</th><td>Lynch, FAP, DII, histórico familiar (1º grau) ou pessoal de CCR/pólipos adenomatosos</td><td>Identificar e registrar predisposição; não aplicar rastreamento populacional</td><td><strong>Gastroenterologia / Especializada</strong></td></tr>
+              <tr><th scope="row">Risco habitual &lt; 50 anos</th><td>Assintomático, sem alto risco</td><td>Promoção da saúde (alimentação, atividade física, álcool, tabaco)</td><td>Acompanhamento na UBS</td></tr>
+              <tr><th scope="row">Rastreamento bienal (50 a 75 anos)</th><td>Assintomático, risco habitual</td><td>Solicitar <strong>FIT</strong> a cada 2 anos (kit de coleta domiciliar, sem preparo)</td><td>Laboratório de análises</td></tr>
+              <tr><th scope="row">&gt; 75 anos</th><td>Assintomático</td><td>Decisão individualizada com o médico (expectativa de vida e comorbidades)</td><td>Avaliação médica na UBS</td></tr>
+              <tr><th scope="row">FIT positivo (+)</th><td>Sangue oculto detectado</td><td>Regulação para exame confirmatório</td><td><strong>Atenção Especializada (colonoscopia)</strong></td></tr>
+              <tr><th scope="row">FIT negativo (−)</th><td>Sem sangue oculto</td><td>Registrar e agendar novo FIT em 2 anos</td><td>Acompanhamento na UBS</td></tr>
+              <tr><th scope="row">Colonoscopia normal</th><td>Sem lesões (risco habitual)</td><td>Não repetir agora; novo exame em 10 anos</td><td>Acompanhamento na UBS</td></tr>
+              <tr><th scope="row">Pólipo / adenoma ressecado</th><td>Lesão pré-neoplásica removida</td><td>Vigilância endoscópica conforme histopatológico</td><td>Atenção Especializada</td></tr>
+              <tr><th scope="row">Neoplasia confirmada</th><td>Laudo de lesão maligna</td><td>Regulação prioritária para oncologia</td><td><strong>Serviço de oncologia (alta complexidade)</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="hint" style="margin-top:14px">Observação: algumas sociedades médicas (p. ex., SBOC) discutem iniciar o rastreamento aos 45 anos; o protocolo do Ministério da Saúde adota a faixa de 50 a 75 anos, usada nesta ferramenta. Prazos de prioridade na regulação seguem a regulação local.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p><strong>TINA CCR — versão 5.0</strong> · UNICAMP / COTUCA · Autores: <strong>Ana Livia Ferreira</strong> e <strong>Thierry Alexandre da Silva</strong></p>
+    <p style="margin-top:8px"><strong>Fontes consultadas:</strong></p>
+    <ul>
+      <li><a href="https://www.gov.br/inca/pt-br/assuntos/noticias/2026/sus-adota-novo-exame-para-detectar-cancer-de-intestino-antes-dos-sintomas" target="_blank" rel="noopener noreferrer">INCA / Ministério da Saúde — novo protocolo de rastreamento do câncer colorretal no SUS (21/05/2026)</a></li>
+      <li><a href="https://www.gov.br/conitec/pt-br/midias/consultas/relatorios/2026/relatorio-preliminar-diretrizes-brasileiras-do-rastreamento-do-cancer-de-colon-e-reto-cp-20/@@display-file/file" target="_blank" rel="noopener noreferrer">Conitec — Relatório preliminar das Diretrizes Brasileiras do Rastreamento do CCR (Consulta Pública nº 20/2026)</a></li>
+      <li><a href="https://www.gov.br/saude/pt-br/assuntos/pcdt/arquivos/2014/ddt_colorretal__26092014.pdf" target="_blank" rel="noopener noreferrer">Portaria SAS/MS nº 958/2014 — Diretrizes Diagnósticas e Terapêuticas do Carcinoma Colorretal</a></li>
+      <li><a href="https://www.gov.br/conitec/pt-br/midias/protocolos/2026/pcdt-resumido/PCDT_Resumido_Adenocarcinoma_Clon_Retof.pdf" target="_blank" rel="noopener noreferrer">Conitec — PCDT do Adenocarcinoma de Cólon e Reto (resumido)</a></li>
+      <li><a href="https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-C%E2%94%9C%E2%94%82lon-doen%E2%94%9Coa-localizada-v6-VERS%E2%94%9CaO-FINAL.pdf" target="_blank" rel="noopener noreferrer">SBOC — Diretrizes de Tratamentos Oncológicos 2026 (intervalos de rastreio)</a></li>
+    </ul>
+    <p>Ferramenta de apoio à decisão: não substitui julgamento clínico, protocolos locais nem a regulação. Conteúdo clínico conforme as fontes acima na data de consulta (outubro/2026); o relatório da Conitec citado era preliminar.</p>
+  </footer>
+</div>
+
+<!-- Modal de confirmação -->
+<dialog id="dlg" aria-labelledby="dlg-titulo">
+  <form method="dialog">
+    <h2 id="dlg-titulo"></h2>
+    <p id="dlg-msg"></p>
+    <div class="btn-row" style="justify-content:flex-end">
+      <button type="submit" value="cancel" class="btn btn-ghost" id="dlg-cancel">Cancelar</button>
+      <button type="submit" value="ok" class="btn btn-danger" id="dlg-ok">Confirmar</button>
+    </div>
+  </form>
+</dialog>
+<div id="toasts" role="status" aria-live="polite"></div>
+
+<script>
+/* ==========================================================================
+   TINA CCR v5 — lógica
+   Seções: 1 Utilitários · 2 Validações · 3 Armazenamento · 4 Regras clínicas
+           5 Interface (abas, cadastro) · 6 Triagem · 7 Exames · 8 Prontuário
+           9 Backup · 10 Inicialização
+   ========================================================================== */
+'use strict';
+
+/* ---------- 1. UTILITÁRIOS ---------- */
+const $ = (id) => document.getElementById(id);
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const digits = (s) => String(s || '').replace(/\D/g, '');
+
+function parseISO(s) {                       // 'AAAA-MM-DD' → Date local (evita erro de fuso UTC)
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
+  if (!m) return null;
+  const d = new Date(+m[1], +m[2] - 1, +m[3]);
+  return (d.getFullYear() === +m[1] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[3]) ? d : null;
+}
+function toISO(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function hojeISO() { return toISO(new Date()); }
+function fmtData(iso) { const d = parseISO(iso); return d ? d.toLocaleDateString('pt-BR') : '—'; }
+function fmtQuando(q) {
+  if (!q) return '—';
+  const d = new Date(q);
+  return isNaN(d) ? String(q) : d.toLocaleString('pt-BR');
+}
+function calcIdade(nascISO, ref) {
+  const n = parseISO(nascISO); if (!n) return null;
+  const h = ref || new Date();
+  let i = h.getFullYear() - n.getFullYear();
+  const m = h.getMonth() - n.getMonth();
+  if (m < 0 || (m === 0 && h.getDate() < n.getDate())) i--;
+  return i;
+}
+function addAnos(iso, anos) { const d = parseISO(iso); d.setFullYear(d.getFullYear() + anos); return toISO(d); }
+function novoId(p) { return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function fmtCPF(v) { const d = digits(v).slice(0, 11); return d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1-$2'); }
+function fmtCNS(v) { const d = digits(v).slice(0, 15); return d.replace(/^(\d{3})(\d)/, '$1 $2').replace(/^(\d{3}) (\d{4})(\d)/, '$1 $2 $3').replace(/^(\d{3}) (\d{4}) (\d{4})(\d)/, '$1 $2 $3 $4'); }
+function fmtTel(v) { const d = digits(v).slice(0, 11); if (d.length <= 2) return d; if (d.length <= 6) return '(' + d.slice(0, 2) + ') ' + d.slice(2); if (d.length <= 10) return '(' + d.slice(0, 2) + ') ' + d.slice(2, 6) + '-' + d.slice(6); return '(' + d.slice(0, 2) + ') ' + d.slice(2, 7) + '-' + d.slice(7); }
+function cpfMascarado(c) { c = digits(c); return c.length === 11 ? '***.' + c.slice(3, 6) + '.' + c.slice(6, 9) + '-**' : '—'; }
+
+function toast(msg, tipo) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + (tipo || 'info'); t.textContent = msg;
+  $('toasts').appendChild(t);
+  setTimeout(() => t.remove(), tipo === 'erro' ? 7000 : 4000);
+}
+function confirmar(titulo, msg, okLabel) {
+  return new Promise((resolve) => {
+    const dlg = $('dlg');
+    $('dlg-titulo').textContent = titulo; $('dlg-msg').textContent = msg; $('dlg-ok').textContent = okLabel || 'Confirmar';
+    const onClose = () => { dlg.removeEventListener('close', onClose); resolve(dlg.returnValue === 'ok'); };
+    dlg.addEventListener('close', onClose);
+    dlg.returnValue = 'cancel';
+    if (typeof dlg.showModal === 'function') dlg.showModal();
+    else { dlg.removeEventListener('close', onClose); resolve(window.confirm(titulo + '\n\n' + msg)); }
+    $('dlg-cancel').focus();
+  });
+}
+
+/* ---------- 2. VALIDAÇÕES ---------- */
+function validarCPF(v) {
+  const c = digits(v);
+  if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+  for (let t = 9; t < 11; t++) {
+    let s = 0;
+    for (let i = 0; i < t; i++) s += +c[i] * (t + 1 - i);
+    const dv = ((s * 10) % 11) % 10;
+    if (dv !== +c[t]) return false;
+  }
+  return true;
+}
+function validarCNS(v) {                       // algoritmo oficial do Cartão Nacional de Saúde
+  const c = digits(v);
+  if (c.length !== 15) return false;
+  if (/^[12]/.test(c)) {                       // número definitivo
+    let s = 0;
+    for (let i = 0; i < 11; i++) s += +c[i] * (15 - i);
+    let dv = 11 - (s % 11); if (dv === 11) dv = 0;
+    let res;
+    if (dv === 10) { s += 2; dv = 11 - (s % 11); if (dv === 11) dv = 0; res = c.slice(0, 11) + '001' + dv; }
+    else res = c.slice(0, 11) + '000' + dv;
+    return res === c;
+  }
+  if (/^[789]/.test(c)) {                      // número provisório
+    let s = 0;
+    for (let i = 0; i < 15; i++) s += +c[i] * (15 - i);
+    return s % 11 === 0;
+  }
+  return false;
+}
+function setErr(campo, msg) {
+  const el = $(campo), er = $('err-' + campo);
+  if (el) el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+  if (er) er.textContent = msg || '';
+  return !msg;
+}
+
+/* ---------- 3. ARMAZENAMENTO ---------- */
+const KEY = 'tina_ccr_v5_pacientes', KEY_ATIVO = 'tina_ccr_v5_ativo', KEY_OLD = 'tina_pacientes_db';
+let pacientes = [], ativoId = null, storageOk = true;
+
+function storageGet(k) { try { return localStorage.getItem(k); } catch (e) { storageOk = false; return null; } }
+function storageSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { storageOk = false; return false; } }
+
+function statusLegado(txt) {
+  const t = String(txt || '');
+  if (/Neoplasia/i.test(t)) return 'NEOPLASIA';
+  if (/Colonoscopia Normal/i.test(t)) return 'ENDO_NORMAL';
+  if (/Pólipo/i.test(t)) return 'ENDO_POLIPO';
+  if (/SOF Positivo/i.test(t)) return 'FIT_POSITIVO';
+  if (/SOF Negativo/i.test(t)) return 'FIT_NEGATIVO';
+  if (/Sintom/i.test(t)) return 'SINTOMATICO';
+  if (/Alto Risco/i.test(t)) return 'ALTO_RISCO';
+  if (/Acompanhamento UBS/i.test(t)) return 'RISCO_HABITUAL';
+  if (/Aguardando Exame/i.test(t)) return 'ELEGIVEL_RASTREIO';
+  return 'AGUARDANDO_TRIAGEM';
+}
+function normalizarPaciente(o) {               // garante estrutura e tipos (também usado na importação/migração)
+  if (!o || typeof o !== 'object') return null;
+  const s = (v, n) => String(v ?? '').slice(0, n || 200);
+  const cpf = digits(o.cpf), cns = digits(o.cns);
+  if (!parseISO(o.nascimento) || !s(o.nome).trim()) return null;
+  return {
+    id: s(o.id) || novoId('PAC'),
+    nome: s(o.nome, 120).trim(), cns, cpf, nascimento: o.nascimento,
+    sexo: ['Feminino', 'Masculino', 'Outro'].includes(o.sexo) ? o.sexo : 'Outro',
+    esf: s(o.esf, 80), ubs: s(o.ubs, 80), telefone: s(o.telefone, 20),
+    triagem: o.triagem && typeof o.triagem === 'object' ? {
+      data: s(o.triagem.data, 40), codigo: s(o.triagem.codigo, 30), classificacao: s(o.triagem.classificacao, 200),
+      sintomas: Array.isArray(o.triagem.sintomas) ? o.triagem.sintomas.map((x) => s(x, 200)) : [],
+      riscos: Array.isArray(o.triagem.riscos) ? o.triagem.riscos.map((x) => s(x, 200)) : [],
+      fatores: Array.isArray(o.triagem.fatores) ? o.triagem.fatores.map((x) => s(x, 200)) : [],
+      idadeNaTriagem: Number.isFinite(+o.triagem.idadeNaTriagem) ? +o.triagem.idadeNaTriagem : null
+    } : null,
+    exames: Array.isArray(o.exames) ? o.exames.map((e) => ({
+      id: s(e.id) || novoId('EX'), tipo: s(e.tipo, 30), resultado: s(e.resultado, 60),
+      data: parseISO(e.data) ? e.data : hojeISO(), obs: s(e.obs, 1000), registradoEm: s(e.registradoEm, 40)
+    })).filter((e) => TIPOS_EXAME[e.tipo]) : [],
+    statusLegado: s(o.statusLegado, 30),
+    historico: Array.isArray(o.historico) ? o.historico.map((h) => ({ quando: s(h.quando, 60), titulo: s(h.titulo, 200), detalhes: s(h.detalhes, 1500) })) : [],
+    criadoEm: s(o.criadoEm, 40) || new Date().toISOString()
+  };
+}
+function carregar() {
+  const raw = storageGet(KEY);
+  if (raw) {
+    try {
+      const arr = JSON.parse(raw);
+      pacientes = (Array.isArray(arr) ? arr : []).map(normalizarPaciente).filter(Boolean);
+    } catch (e) {
+      storageSet(KEY + '_corrompido_' + Date.now(), raw);
+      pacientes = [];
+      toast('Os dados salvos estavam corrompidos e foram preservados em uma cópia separada. Iniciando lista vazia.', 'erro');
+    }
+  } else {
+    const old = storageGet(KEY_OLD);               // migração da versão anterior (a chave antiga não é apagada)
+    if (old) {
+      try {
+        const arr = JSON.parse(old);
+        pacientes = (Array.isArray(arr) ? arr : []).map((p) => normalizarPaciente({ ...p, statusLegado: statusLegado(p.status),
+          historico: (p.historico || []).map((h) => ({ quando: h.data, titulo: h.titulo, detalhes: h.detalhes })) })).filter(Boolean);
+        if (pacientes.length) { salvar(); toast(pacientes.length + ' paciente(s) migrado(s) da versão anterior.', 'info'); }
+      } catch (e) { pacientes = []; }
+    }
+  }
+  ativoId = storageGet(KEY_ATIVO);
+  if (!pacientes.some((p) => p.id === ativoId)) ativoId = null;
+  if (!storageOk) mostrarBannerStorage();
+}
+function salvar() {
+  const ok = storageSet(KEY, JSON.stringify(pacientes)) && storageSet(KEY_ATIVO, ativoId || '');
+  if (!ok) { mostrarBannerStorage(); toast('Não foi possível salvar no navegador (armazenamento bloqueado ou cheio). Exporte uma cópia para não perder dados.', 'erro'); }
+  return ok;
+}
+function mostrarBannerStorage() {
+  const b = $('storage-banner');
+  b.hidden = false;
+  b.textContent = 'Atenção: o armazenamento local deste navegador está indisponível (modo privado ou bloqueado). Os dados desta sessão serão perdidos ao fechar a página. Use "Exportar cópia".';
+}
+const getAtivo = () => pacientes.find((p) => p.id === ativoId) || null;
+function log(p, titulo, detalhes) { p.historico.unshift({ quando: new Date().toISOString(), titulo, detalhes }); }
+
+/* ---------- 4. REGRAS CLÍNICAS ---------- */
+const TIPOS_EXAME = { 'FIT': 'FIT (imunoquímico)', 'g-FOBT': 'g-FOBT (guaiaco)', 'Colonoscopia': 'Colonoscopia', 'Retossigmoidoscopia': 'Retossigmoidoscopia' };
+const STATUS = {
+  AGUARDANDO_TRIAGEM: ['Aguardando triagem', 'info'],
+  SINTOMATICO: ['Sintomático — investigação diagnóstica', 'alert'],
+  ALTO_RISCO: ['Alto risco — encaminhar à especializada', 'warn'],
+  RISCO_HABITUAL: ['Risco habitual (< 50 anos) — acompanhamento UBS', 'info'],
+  ELEGIVEL_RASTREIO: ['Elegível ao rastreamento — aguardando FIT', 'ok'],
+  AVALIACAO_INDIVIDUAL: ['> 75 anos — decisão individualizada', 'warn'],
+  FIT_NEGATIVO: ['FIT negativo — rastreio bienal', 'ok'],
+  FIT_POSITIVO: ['FIT positivo — encaminhar à colonoscopia', 'alert'],
+  ENDO_NORMAL: ['Exame endoscópico normal', 'ok'],
+  ENDO_POLIPO: ['Pólipo/adenoma ressecado — vigilância', 'warn'],
+  NEOPLASIA: ['Neoplasia confirmada — oncologia', 'alert']
+};
+
+function classificar(idade, sintomas, riscos) {
+  if (sintomas.length) return { cod: 'SINTOMATICO', cls: 'res-alert', titulo: 'Sintomático: sinais de alerta — investigação diagnóstica',
+    html: '<ul><li><strong>Não utilizar o FIT como triagem:</strong> o teste é destinado ao rastreamento de pessoas <u>assintomáticas</u> (Portaria do Ministério da Saúde); não serve para investigar sintomas.</li>' +
+      '<li>Acionar o <strong>médico da equipe</strong> e encaminhar para <strong>investigação diagnóstica</strong> na Atenção Especializada via regulação (SISREG), com <strong>colonoscopia</strong> como método preferencial (DDT/PCDT do Ministério da Saúde). Se houver suspeita retal, o exame proctológico (toque retal) é mandatório na avaliação médica.</li>' +
+      '<li>Informar os sinais de alerta no pedido de regulação para definição de prioridade conforme a regulação local.</li>' +
+      (riscos.length ? '<li>Fatores de alto risco também assinalados: registrar no encaminhamento.</li>' : '') + '</ul>' };
+  if (riscos.length) return { cod: 'ALTO_RISCO', cls: 'res-warn', titulo: 'Alto risco hereditário ou clínico',
+    html: '<p>Condição que <strong>exclui o rastreamento populacional com FIT</strong> (Diretrizes Brasileiras de Rastreamento — Conitec/MS).</p>' +
+      '<ul><li>Encaminhar para a <strong>Atenção Especializada / Gastroenterologia</strong> (SISREG) para estratégia individualizada (em geral colonoscopia com intervalos e idade de início específicos), <strong>independentemente da idade</strong>.</li>' +
+      '<li>Registrar história familiar e/ou diagnóstico no prontuário; considerar aconselhamento genético quando disponível.</li></ul>' };
+  if (idade < 50) return { cod: 'RISCO_HABITUAL', cls: 'res-info', titulo: 'Risco habitual, menos de 50 anos',
+    html: '<ul><li>Sem indicação de rastreamento populacional com FIT no momento (faixa do SUS: 50 a 75 anos).</li>' +
+      '<li><strong>Promoção da saúde:</strong> alimentação rica em fibras, frutas e vegetais; reduzir carne processada e vermelha, álcool, tabaco e excesso de peso; estimular atividade física.</li>' +
+      '<li>Orientar a procurar a UBS diante de qualquer sinal de alerta. Manter acompanhamento na UBS.</li></ul>' };
+  if (idade > 75) return { cod: 'AVALIACAO_INDIVIDUAL', cls: 'res-warn', titulo: 'Idade superior a 75 anos',
+    html: '<ul><li>Fora da faixa de rastreamento sistemático do SUS (50 a 75 anos).</li>' +
+      '<li>A decisão de rastrear deve ser <strong>individualizada com o médico</strong>, considerando expectativa de vida e comorbidades (SBOC: 75 a 85 anos).</li>' +
+      '<li>Se o médico indicar, prosseguir com o <strong>FIT</strong>.</li></ul>' };
+  return { cod: 'ELEGIVEL_RASTREIO', cls: 'res-ok', titulo: 'Elegível ao rastreamento de rotina (assintomático, 50 a 75 anos)',
+    html: '<ul><li><strong>Conduta:</strong> solicitar o <strong>FIT (teste imunoquímico fecal)</strong>, <strong>bienal</strong> (a cada 2 anos).</li>' +
+      '<li>O FIT usa kit de coleta domiciliar, <strong>sem preparo intestinal, sem dieta restritiva e com uma amostra</strong> (INCA/MS).</li>' +
+      '<li>Resultado positivo: encaminhar para colonoscopia (Atenção Especializada). Negativo: repetir em 2 anos.</li></ul>' };
+}
+
+function resultadosDoExame(tipo) {
+  return (tipo === 'FIT' || tipo === 'g-FOBT')
+    ? [['Negativo (-)', 'Negativo (−)'], ['Positivo (+)', 'Positivo (+)']]
+    : [['Normal / sem lesões', 'Normal / sem diagnóstico conclusivo (sem lesões)'], ['Pólipo / adenoma ressecado', 'Pólipo / adenoma ressecado'], ['Neoplasia / lesão maligna confirmada', 'Neoplasia / lesão maligna confirmada (+)']];
+}
+function avaliarExame(tipo, res) {               // devolve status + bloco de conduta
+  const sof = tipo === 'FIT' || tipo === 'g-FOBT';
+  if (sof && res.startsWith('Positivo')) return { cod: 'FIT_POSITIVO', cls: 'res-alert', titulo: 'Sangue oculto POSITIVO (' + tipo + ')',
+    html: '<ul><li>Detecção de sangue oculto nas fezes.</li><li><strong>Conduta:</strong> regulação para <strong>colonoscopia</strong> na Atenção Especializada (SISREG).</li></ul>' };
+  if (sof) return { cod: 'FIT_NEGATIVO', cls: 'res-ok', titulo: 'Sangue oculto NEGATIVO (' + tipo + ')',
+    html: '<ul><li>Registrar no prontuário e manter acompanhamento na UBS.</li><li><strong>Próximo exame:</strong> repetir o teste em <strong>2 anos</strong> (rastreamento bienal), mantendo-se assintomático e dentro dos 50–75 anos.</li></ul>' };
+  if (res.startsWith('Normal')) {
+    const anos = tipo === 'Colonoscopia' ? '10 anos' : '5 anos';
+    return { cod: 'ENDO_NORMAL', cls: 'res-ok', titulo: tipo + ' normal / sem diagnóstico conclusivo',
+      html: '<ul><li><strong>Não repetir agora.</strong> Em <strong>risco habitual</strong>, o próximo exame é indicado após <strong>' + anos + '</strong>, se permanecer assintomático (' + (tipo === 'Colonoscopia' ? 'Diretrizes Brasileiras de Rastreamento — Conitec' : 'SBOC') + ').</li>' +
+        '<li>Para pacientes de alto risco ou sintomáticos, o intervalo segue protocolo específico definido pelo especialista.</li></ul>' };
+  }
+  if (res.startsWith('Pólipo')) return { cod: 'ENDO_POLIPO', cls: 'res-warn', titulo: 'Pólipo / adenoma ressecado',
+    html: '<ul><li>Lesão pré-neoplásica removida.</li><li><strong>Conduta:</strong> <strong>vigilância endoscópica</strong> periódica, com intervalo definido pelo especialista conforme o laudo histopatológico.</li></ul>' };
+  return { cod: 'NEOPLASIA', cls: 'res-max', titulo: 'ALERTA MÁXIMO: neoplasia / lesão maligna confirmada',
+    html: '<ul><li><strong>Conduta urgente:</strong> regulação prioritária para <strong>serviço de oncologia</strong> (alta complexidade), com laudo e histopatológico anexados.</li></ul>' };
+}
+function derivarStatus(p) {                      // status calculado a partir do histórico estruturado
+  if (p.exames.some((e) => e.resultado.startsWith('Neoplasia'))) return 'NEOPLASIA';
+  if (p.exames.length) {
+    const ord = [...p.exames].sort((a, b) => (a.data === b.data ? String(a.registradoEm).localeCompare(String(b.registradoEm)) : a.data.localeCompare(b.data)));
+    const u = ord[ord.length - 1];
+    return avaliarExame(u.tipo, u.resultado).cod;
+  }
+  if (p.triagem && STATUS[p.triagem.codigo]) return p.triagem.codigo;
+  if (p.statusLegado && STATUS[p.statusLegado]) return p.statusLegado;
+  return 'AGUARDANDO_TRIAGEM';
+}
+function proximoExame(p) {
+  if (!p.exames.length) return null;
+  const ord = [...p.exames].sort((a, b) => a.data.localeCompare(b.data));
+  const u = ord[ord.length - 1];
+  const risco = p.triagem && (p.triagem.codigo === 'ALTO_RISCO' || p.triagem.codigo === 'SINTOMATICO');
+  let anos = null, nome = '';
+  if ((u.tipo === 'FIT' || u.tipo === 'g-FOBT') && u.resultado.startsWith('Negativo')) { anos = 2; nome = 'novo FIT'; }
+  else if (u.tipo === 'Colonoscopia' && u.resultado.startsWith('Normal') && !risco) { anos = 10; nome = 'nova colonoscopia'; }
+  else if (u.tipo === 'Retossigmoidoscopia' && u.resultado.startsWith('Normal') && !risco) { anos = 5; nome = 'nova retossigmoidoscopia'; }
+  if (!anos) return null;
+  const data = addAnos(u.data, anos);
+  return { nome, data, atrasado: data < hojeISO() };
+}
+const pillStatus = (cod) => { const s = STATUS[cod] || STATUS.AGUARDANDO_TRIAGEM; return '<span class="pill ' + s[1] + '">' + esc(s[0]) + '</span>'; };
+
+/* ---------- 5. INTERFACE: ABAS E CADASTRO ---------- */
+const TABS = ['cadastro', 'triagem', 'exames', 'prontuario', 'diretrizes'];
+function trocarAba(nome, focar) {
+  TABS.forEach((t) => {
+    const sel = t === nome;
+    $('tab-' + t).hidden = !sel;
+    const b = $('tab-btn-' + t);
+    b.setAttribute('aria-selected', sel ? 'true' : 'false'); b.tabIndex = sel ? 0 : -1;
+  });
+  if (focar) $('tab-btn-' + nome).focus();
+  atualizarBanner();
+  if (nome === 'cadastro') renderLista();
+  if (nome === 'triagem') carregarTriagem();
+  if (nome === 'exames') prepararExames();
+  if (nome === 'prontuario') renderProntuario();
+}
+function atualizarBanner() {
+  const p = getAtivo();
+  $('active-name').textContent = p ? p.nome : 'Nenhum paciente selecionado';
+  $('active-cns').textContent = p ? fmtCNS(p.cns) : '—';
+  $('active-cpf').textContent = p ? fmtCPF(p.cpf) : '—';
+  $('active-age').textContent = p ? calcIdade(p.nascimento) + ' anos' : '—';
+  $('active-esf').textContent = p && p.esf ? p.esf : '—';
+}
+function irParaInicio() { $('screen-app').style.display = 'none'; $('screen-home').style.display = 'flex'; window.scrollTo(0, 0); }
+function iniciar() { $('screen-home').style.display = 'none'; $('screen-app').style.display = 'block'; trocarAba('cadastro'); window.scrollTo(0, 0); }
+
+function renderLista() {
+  const termo = ($('search-paciente').value || '').trim().toLowerCase(), td = digits(termo);
+  const lista = pacientes.filter((p) => !termo || p.nome.toLowerCase().includes(termo) || (td && (p.cns.includes(td) || p.cpf.includes(td))));
+  const tb = $('tbody-pacientes');
+  if (!lista.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muda);padding:18px">' + (pacientes.length ? 'Nenhum paciente encontrado para a busca.' : 'Nenhum paciente cadastrado ainda.') + '</td></tr>'; return; }
+  tb.innerHTML = lista.map((p) => {
+    const ativo = p.id === ativoId, n = esc(p.nome);
+    return '<tr class="' + (ativo ? 'row-ativo' : '') + '"><td><strong>' + n + '</strong></td><td>' + esc(fmtCNS(p.cns)) + '</td><td>' + esc(cpfMascarado(p.cpf)) + '</td><td>' + calcIdade(p.nascimento) + ' anos</td><td>' + esc(p.esf || '—') + ' / ' + esc(p.ubs || '—') + '</td><td>' + pillStatus(derivarStatus(p)) + '</td>' +
+      '<td><div class="btn-row"><button type="button" class="btn btn-sm" data-act="sel" data-id="' + esc(p.id) + '" aria-label="Selecionar ' + n + '"' + (ativo ? ' aria-pressed="true"' : '') + '>' + (ativo ? 'Ativo' : 'Selecionar') + '</button>' +
+      '<button type="button" class="btn btn-sm btn-ghost" data-act="edit" data-id="' + esc(p.id) + '" aria-label="Editar ' + n + '"><svg class="ic"><use href="#i-edit"/></svg></button>' +
+      '<button type="button" class="btn btn-sm btn-ghost" data-act="del" data-id="' + esc(p.id) + '" aria-label="Excluir ' + n + '"><svg class="ic"><use href="#i-trash"/></svg></button></div></td></tr>';
+  }).join('');
+}
+function limparFormCadastro() {
+  $('form-cadastro').reset(); $('cad-id').value = '';
+  ['cad-nome', 'cad-cns', 'cad-cpf', 'cad-nasc', 'cad-sexo', 'cad-tel'].forEach((c) => setErr(c, ''));
+  $('cad-titulo').textContent = '1. Cadastro do paciente (e-SUS APS / Cartão Nacional de Saúde)';
+  $('btn-salvar-cad-txt').textContent = 'Salvar cadastro e iniciar atendimento';
+  $('btn-cancelar-edicao').hidden = true;
+}
+function editarPaciente(id) {
+  const p = pacientes.find((x) => x.id === id); if (!p) return;
+  limparFormCadastro();
+  $('cad-id').value = p.id; $('cad-nome').value = p.nome; $('cad-cns').value = fmtCNS(p.cns); $('cad-cpf').value = fmtCPF(p.cpf);
+  $('cad-nasc').value = p.nascimento; $('cad-sexo').value = p.sexo; $('cad-esf').value = p.esf; $('cad-ubs').value = p.ubs; $('cad-tel').value = p.telefone;
+  $('cad-titulo').textContent = 'Editando cadastro: ' + p.nome;
+  $('btn-salvar-cad-txt').textContent = 'Salvar alterações';
+  $('btn-cancelar-edicao').hidden = false;
+  $('cad-nome').focus(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function validarCadastro() {
+  const id = $('cad-id').value, nome = $('cad-nome').value.trim().replace(/\s+/g, ' ');
+  const cns = digits($('cad-cns').value), cpf = digits($('cad-cpf').value), nasc = $('cad-nasc').value, tel = digits($('cad-tel').value);
+  let ok = true;
+  ok = setErr('cad-nome', nome.length < 5 || !/\s/.test(nome) ? 'Informe o nome completo (nome e sobrenome).' : '') && ok;
+  const cnsMsg = cns.length !== 15 ? 'O CNS deve ter 15 dígitos.' : !validarCNS(cns) ? 'CNS inválido (dígito verificador não confere).' : pacientes.some((p) => p.cns === cns && p.id !== id) ? 'Já existe paciente com este CNS.' : '';
+  ok = setErr('cad-cns', cnsMsg) && ok;
+  const cpfMsg = cpf.length !== 11 ? 'O CPF deve ter 11 dígitos.' : !validarCPF(cpf) ? 'CPF inválido (dígito verificador não confere).' : pacientes.some((p) => p.cpf === cpf && p.id !== id) ? 'Já existe paciente com este CPF.' : '';
+  ok = setErr('cad-cpf', cpfMsg) && ok;
+  const d = parseISO(nasc);
+  const nascMsg = !d ? 'Informe a data de nascimento.' : d > new Date() ? 'A data de nascimento não pode ser futura.' : calcIdade(nasc) > 120 ? 'Data de nascimento inválida (idade acima de 120 anos).' : '';
+  ok = setErr('cad-nasc', nascMsg) && ok;
+  ok = setErr('cad-sexo', $('cad-sexo').value ? '' : 'Selecione o sexo.') && ok;
+  ok = setErr('cad-tel', tel && (tel.length < 10 || tel.length > 11) ? 'Telefone deve ter DDD + 8 ou 9 dígitos.' : '') && ok;
+  return ok ? { id, nome, cns, cpf, nasc, tel } : null;
+}
+function salvarCadastro(e) {
+  e.preventDefault();
+  const v = validarCadastro();
+  if (!v) { const bad = document.querySelector('#form-cadastro [aria-invalid="true"]'); if (bad) bad.focus(); toast('Corrija os campos destacados.', 'erro'); return; }
+  const dados = { nome: v.nome, cns: v.cns, cpf: v.cpf, nascimento: v.nasc, sexo: $('cad-sexo').value, esf: $('cad-esf').value.trim(), ubs: $('cad-ubs').value.trim(), telefone: fmtTel(v.tel) };
+  if (v.id) {
+    const p = pacientes.find((x) => x.id === v.id);
+    Object.assign(p, dados); log(p, 'Cadastro atualizado', 'Dados cadastrais alterados.');
+    salvar(); limparFormCadastro(); renderLista(); atualizarBanner(); toast('Cadastro atualizado.', 'ok');
+  } else {
+    const p = normalizarPaciente({ ...dados, historico: [{ quando: new Date().toISOString(), titulo: 'Cadastro e-SUS APS realizado', detalhes: 'Paciente cadastrado na unidade e integrado à linha de cuidado.' }] });
+    pacientes.unshift(p); ativoId = p.id; salvar(); limparFormCadastro(); renderLista(); atualizarBanner();
+    toast('Paciente cadastrado. Seguindo para a triagem.', 'ok'); trocarAba('triagem', true);
+  }
+}
+async function acaoLista(ev) {
+  const b = ev.target.closest('button[data-act]'); if (!b) return;
+  const id = b.dataset.id, p = pacientes.find((x) => x.id === id); if (!p) return;
+  if (b.dataset.act === 'sel') { ativoId = id; salvar(); renderLista(); atualizarBanner(); toast('Paciente selecionado: ' + p.nome, 'ok'); }
+  else if (b.dataset.act === 'edit') editarPaciente(id);
+  else if (b.dataset.act === 'del') {
+    if (await confirmar('Excluir paciente?', 'Todo o prontuário de "' + p.nome + '" (triagem, exames e histórico) será apagado deste navegador. Esta ação não pode ser desfeita.', 'Excluir')) {
+      pacientes = pacientes.filter((x) => x.id !== id); if (ativoId === id) ativoId = null;
+      salvar(); renderLista(); atualizarBanner(); toast('Paciente excluído.', 'info');
+    }
+  }
+}
+
+/* ---------- 6. TRIAGEM ---------- */
+function lerTriagem() {
+  const pega = (cls) => [...document.querySelectorAll(cls + ':checked')].map((c) => c.value);
+  return { assint: $('chk-assint').checked, sintomas: pega('.chk-sint'), riscos: pega('.chk-risco'), fatores: pega('.chk-fator') };
+}
+function carregarTriagem() {
+  const p = getAtivo();
+  $('triagem-vazio').hidden = !!p; $('triagem-corpo').hidden = !p;
+  document.querySelectorAll('#form-triagem input').forEach((c) => (c.checked = false));
+  $('err-triagem').textContent = '';
+  if (p && p.triagem) {
+    $('chk-assint').checked = p.triagem.sintomas.length === 0;
+    document.querySelectorAll('.chk-sint').forEach((c) => (c.checked = p.triagem.sintomas.includes(c.value)));
+    document.querySelectorAll('.chk-risco').forEach((c) => (c.checked = p.triagem.riscos.includes(c.value)));
+    document.querySelectorAll('.chk-fator').forEach((c) => (c.checked = (p.triagem.fatores || []).includes(c.value)));
+  }
+  mostrarTriagem();
+}
+function mostrarTriagem() {
+  const p = getAtivo(), box = $('resultado-triagem');
+  if (!p) { box.innerHTML = ''; return; }
+  const t = lerTriagem();
+  if (!t.assint && !t.sintomas.length) { box.innerHTML = '<div class="result res-info"><h3>Aguardando avaliação</h3><p>Marque “paciente assintomático” ou os sinais de alerta presentes para ver a conduta.</p></div>'; return; }
+  const r = classificar(calcIdade(p.nascimento), t.sintomas, t.riscos);
+  box.innerHTML = '<div class="result ' + r.cls + '"><h3>' + esc(r.titulo) + '</h3>' + r.html + '</div>';
+}
+function salvarTriagem() {
+  const p = getAtivo(); if (!p) { toast('Selecione ou cadastre um paciente primeiro.', 'erro'); return; }
+  const t = lerTriagem();
+  if (!t.assint && !t.sintomas.length) { $('err-triagem').textContent = 'Informe se o paciente é assintomático ou marque ao menos um sinal de alerta.'; $('chk-assint').focus(); return; }
+  $('err-triagem').textContent = '';
+  const idade = calcIdade(p.nascimento), r = classificar(idade, t.sintomas, t.riscos);
+  p.triagem = { data: new Date().toISOString(), codigo: r.cod, classificacao: r.titulo, sintomas: t.sintomas, riscos: t.riscos, fatores: t.fatores, idadeNaTriagem: idade };
+  log(p, 'Triagem clínica e de risco realizada', 'Classificação: ' + r.titulo + '. Idade: ' + idade + ' anos. Sinais: ' + (t.sintomas.length ? t.sintomas.join('; ') : 'assintomático') + '. Alto risco: ' + (t.riscos.length ? t.riscos.join('; ') : 'nenhum') + '.');
+  salvar(); atualizarBanner(); toast('Triagem salva no prontuário.', 'ok');
+}
+function aoMarcarAssint() { if ($('chk-assint').checked) document.querySelectorAll('.chk-sint').forEach((c) => (c.checked = false)); mostrarTriagem(); }
+function aoMarcarSint() { if (document.querySelector('.chk-sint:checked')) $('chk-assint').checked = false; mostrarTriagem(); }
+
+/* ---------- 7. EXAMES ---------- */
+function prepararExames() {
+  const p = getAtivo();
+  $('exames-vazio').hidden = !!p; $('exames-corpo').hidden = !p;
+  $('exame-data').max = hojeISO(); setErr('exame-data', '');
+  montarResultados();
+}
+function montarResultados() {
+  const tipo = $('exame-tipo').value;
+  $('exame-resultado').innerHTML = resultadosDoExame(tipo).map((o) => '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>').join('');
+  mostrarPreviaExame();
+}
+function mostrarPreviaExame() {
+  const r = avaliarExame($('exame-tipo').value, $('exame-resultado').value);
+  $('preview-exame').innerHTML = '<div class="result ' + r.cls + '"><h3>' + esc(r.titulo) + '</h3>' + r.html + '</div>';
+}
+function salvarExame(e) {
+  e.preventDefault();
+  const p = getAtivo(); if (!p) { toast('Selecione ou cadastre um paciente primeiro.', 'erro'); return; }
+  const tipo = $('exame-tipo').value, res = $('exame-resultado').value, data = $('exame-data').value, obs = $('exame-obs').value.trim();
+  const d = parseISO(data), nasc = parseISO(p.nascimento);
+  const msg = !d ? 'Informe a data de realização do exame.' : d > new Date() ? 'A data do exame não pode ser futura.' : d < nasc ? 'A data do exame é anterior ao nascimento do paciente.' : '';
+  if (!setErr('exame-data', msg)) { $('exame-data').focus(); return; }
+  if (p.exames.some((x) => x.tipo === tipo && x.data === data && x.resultado === res)) { toast('Já existe um lançamento idêntico (mesmo exame, resultado e data).', 'erro'); return; }
+  p.exames.push({ id: novoId('EX'), tipo, resultado: res, data, obs, registradoEm: new Date().toISOString() });
+  log(p, 'Exame lançado: ' + TIPOS_EXAME[tipo], 'Data do exame: ' + fmtData(data) + '. Resultado: ' + res + '. Observações: ' + (obs || 'sem observações') + '.');
+  salvar(); $('form-exame').reset(); montarResultados(); atualizarBanner();
+  toast('Exame salvo no prontuário.', 'ok'); trocarAba('prontuario', true);
+}
+
+/* ---------- 8. PRONTUÁRIO ---------- */
+function renderProntuario() {
+  const p = getAtivo();
+  $('prontuario-vazio').hidden = !!p; $('prontuario-corpo').hidden = !p;
+  const alerta = $('prontuario-alerta');
+  if (!p) { alerta.innerHTML = ''; $('print-cabecalho').textContent = ''; return; }
+  const cod = derivarStatus(p), prox = proximoExame(p);
+  let a = '';
+  if (cod === 'FIT_POSITIVO') a = '<div class="result res-alert"><h3><svg class="ic"><use href="#i-alert"/></svg> Alerta crítico de regulação (SISREG / Atenção Especializada)</h3><p>Indicação de encaminhamento para <strong>colonoscopia</strong> após FIT positivo.</p></div>';
+  else if (cod === 'SINTOMATICO') a = '<div class="result res-alert"><h3><svg class="ic"><use href="#i-alert"/></svg> Alerta: sinais de alerta presentes</h3><p>Encaminhar para <strong>investigação diagnóstica</strong> na Atenção Especializada (SISREG).</p></div>';
+  else if (cod === 'NEOPLASIA') a = '<div class="result res-max"><h3><svg class="ic"><use href="#i-alert"/></svg> Alerta máximo: neoplasia confirmada</h3><p>Regulação prioritária para <strong>serviço de oncologia</strong>.</p></div>';
+  if (prox) a += '<div class="result ' + (prox.atrasado ? 'res-warn' : 'res-ok') + '"><h3>Próximo exame previsto</h3><p>Indicado <strong>' + esc(prox.nome) + '</strong> em <strong>' + fmtData(prox.data) + '</strong>' + (prox.atrasado ? ' — <strong>prazo vencido</strong>, reavaliar.' : '.') + '</p></div>';
+  alerta.innerHTML = a;
+
+  const idade = calcIdade(p.nascimento);
+  $('print-cabecalho').textContent = 'TINA CCR — Prontuário impresso em ' + new Date().toLocaleString('pt-BR') + ' — Documento confidencial (dados pessoais sensíveis).';
+  const campo = (k, v) => '<div><span class="k">' + k + '</span><strong>' + esc(v) + '</strong></div>';
+  $('prontuario-dados').innerHTML = campo('Nome completo', p.nome) + campo('CNS', fmtCNS(p.cns)) + campo('CPF', fmtCPF(p.cpf)) + campo('Nascimento', fmtData(p.nascimento)) +
+    campo('Idade / sexo', idade + ' anos (' + p.sexo + ')') + campo('eSF / UBS', (p.esf || '—') + ' / ' + (p.ubs || '—')) + campo('Telefone', p.telefone || '—') +
+    '<div><span class="k">Status do cuidado</span>' + pillStatus(cod) + '</div>';
+
+  const t = p.triagem;
+  $('prontuario-triagem').innerHTML = t ? '<div class="result res-info" style="margin-top:6px"><h3>' + esc(t.classificacao) + '</h3><p>Realizada em ' + esc(fmtQuando(t.data)) + ' (idade na triagem: ' + esc(t.idadeNaTriagem) + ' anos).</p>' +
+    '<ul><li><strong>Sinais de alerta:</strong> ' + (t.sintomas.length ? esc(t.sintomas.join('; ')) : 'assintomático') + '</li><li><strong>Alto risco:</strong> ' + (t.riscos.length ? esc(t.riscos.join('; ')) : 'nenhum informado') + '</li>' +
+    '<li><strong>Fatores associados:</strong> ' + ((t.fatores || []).length ? esc(t.fatores.join('; ')) : 'nenhum informado') + '</li></ul></div>' : '<p class="hint">Nenhuma triagem registrada para este paciente.</p>';
+
+  const ex = [...p.exames].sort((x, y) => y.data.localeCompare(x.data));
+  $('prontuario-exames').innerHTML = ex.length ? '<table class="data"><thead><tr><th scope="col">Data</th><th scope="col">Exame</th><th scope="col">Resultado</th><th scope="col">Observações</th><th scope="col" class="no-print">Ação</th></tr></thead><tbody>' +
+    ex.map((e) => '<tr><td>' + fmtData(e.data) + '</td><td>' + esc(TIPOS_EXAME[e.tipo]) + '</td><td>' + esc(e.resultado) + '</td><td>' + esc(e.obs || '—') + '</td><td class="no-print"><button type="button" class="btn btn-sm btn-ghost" data-act="del-ex" data-id="' + esc(e.id) + '" aria-label="Excluir lançamento de ' + esc(TIPOS_EXAME[e.tipo]) + ' de ' + fmtData(e.data) + '"><svg class="ic"><use href="#i-trash"/></svg></button></td></tr>').join('') +
+    '</tbody></table>' : '<p class="hint">Nenhum exame lançado.</p>';
+
+  $('timeline').innerHTML = p.historico.length ? p.historico.map((h) => '<li class="tl-item"><div class="tl-date">' + esc(fmtQuando(h.quando)) + '</div><div class="tl-title">' + esc(h.titulo) + '</div><div class="tl-det">' + esc(h.detalhes) + '</div></li>').join('') : '<li class="hint">Sem registros.</li>';
+}
+async function excluirExame(ev) {
+  const b = ev.target.closest('button[data-act="del-ex"]'); if (!b) return;
+  const p = getAtivo(); const e = p && p.exames.find((x) => x.id === b.dataset.id); if (!e) return;
+  if (await confirmar('Excluir lançamento de exame?', TIPOS_EXAME[e.tipo] + ' de ' + fmtData(e.data) + ' (' + e.resultado + '). O status do paciente será recalculado. A exclusão fica registrada na linha do tempo.', 'Excluir')) {
+    p.exames = p.exames.filter((x) => x.id !== e.id);
+    log(p, 'Lançamento de exame excluído', TIPOS_EXAME[e.tipo] + ' de ' + fmtData(e.data) + ' (' + e.resultado + ').');
+    salvar(); renderProntuario(); atualizarBanner(); toast('Lançamento excluído.', 'info');
+  }
+}
+function imprimirProntuario() {
+  document.body.classList.add('print-prontuario');
+  const fim = () => { document.body.classList.remove('print-prontuario'); window.removeEventListener('afterprint', fim); };
+  window.addEventListener('afterprint', fim); window.print();
+}
+
+/* ---------- 9. BACKUP / LGPD ---------- */
+function baixarJSON(obj, nome) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function exportar(todos) {
+  const lista = todos ? pacientes : [getAtivo()].filter(Boolean);
+  if (!lista.length) { toast('Nada para exportar.', 'erro'); return; }
+  baixarJSON({ sistema: 'TINA CCR', versao: 5, exportadoEm: new Date().toISOString(), pacientes: lista }, 'tina-ccr-' + (todos ? 'backup' : 'paciente') + '-' + hojeISO() + '.json');
+  toast('Arquivo exportado. Guarde-o em local seguro (contém dados sensíveis).', 'ok');
+}
+function importar(file) {
+  const rd = new FileReader();
+  rd.onerror = () => toast('Não foi possível ler o arquivo.', 'erro');
+  rd.onload = async () => {
+    let obj; try { obj = JSON.parse(rd.result); } catch (e) { toast('Arquivo inválido: não é um JSON.', 'erro'); return; }
+    const arr = Array.isArray(obj) ? obj : obj && Array.isArray(obj.pacientes) ? obj.pacientes : null;
+    if (!arr) { toast('Arquivo não reconhecido como cópia do TINA CCR.', 'erro'); return; }
+    const novos = []; let ign = 0;
+    arr.forEach((o) => {
+      const p = normalizarPaciente(o);
+      const dup = !p || !validarCPF(p.cpf) || !validarCNS(p.cns) || [...pacientes, ...novos].some((x) => x.cpf === p.cpf || x.cns === p.cns || x.id === p.id);
+      if (dup) ign++; else novos.push(p);
+    });
+    if (!novos.length) { toast('Nenhum paciente novo para importar (' + ign + ' ignorado(s): inválidos ou já cadastrados).', 'info'); return; }
+    if (await confirmar('Importar cópia?', novos.length + ' paciente(s) serão adicionados; ' + ign + ' ignorado(s) (inválidos ou já cadastrados).', 'Importar')) {
+      pacientes = novos.concat(pacientes); salvar(); renderLista(); toast(novos.length + ' paciente(s) importado(s).', 'ok');
+    }
+  };
+  rd.readAsText(file);
+}
+async function apagarTudo() {
+  if (!pacientes.length) { toast('Não há dados para apagar.', 'info'); return; }
+  if (await confirmar('Apagar TODOS os dados?', 'Todos os ' + pacientes.length + ' pacientes serão removidos deste navegador. Recomenda-se exportar uma cópia antes. Esta ação não pode ser desfeita.', 'Apagar tudo')) {
+    pacientes = []; ativoId = null; salvar(); try { localStorage.removeItem(KEY_OLD); } catch (e) {}
+    renderLista(); atualizarBanner(); toast('Todos os dados foram apagados.', 'info');
+  }
+}
+
+/* ---------- 10. INICIALIZAÇÃO ---------- */
+function mascara(id, fn) { $(id).addEventListener('input', (e) => { e.target.value = fn(e.target.value); }); }
+function init() {
+  carregar();
+  $('btn-iniciar').addEventListener('click', iniciar);
+  $('btn-home').addEventListener('click', irParaInicio);
+  document.querySelectorAll('[data-goto]').forEach((b) => b.addEventListener('click', () => trocarAba(b.dataset.goto, true)));
+  document.querySelectorAll('.tab-btn').forEach((b) => b.addEventListener('click', () => trocarAba(b.dataset.tab)));
+  $('tab-btn-cadastro').parentElement.addEventListener('keydown', (e) => {   // navegação por setas (padrão WAI-ARIA)
+    const i = TABS.indexOf(document.activeElement.dataset.tab); if (i < 0) return;
+    let n = null;
+    if (e.key === 'ArrowRight') n = (i + 1) % TABS.length; else if (e.key === 'ArrowLeft') n = (i + TABS.length - 1) % TABS.length;
+    else if (e.key === 'Home') n = 0; else if (e.key === 'End') n = TABS.length - 1;
+    if (n !== null) { e.preventDefault(); trocarAba(TABS[n], true); }
+  });
+  mascara('cad-cpf', fmtCPF); mascara('cad-cns', fmtCNS); mascara('cad-tel', fmtTel);
+  $('cad-nasc').max = hojeISO();
+  $('form-cadastro').addEventListener('submit', salvarCadastro);
+  $('btn-cancelar-edicao').addEventListener('click', limparFormCadastro);
+  $('search-paciente').addEventListener('input', renderLista);
+  $('tbody-pacientes').addEventListener('click', acaoLista);
+  $('chk-assint').addEventListener('change', aoMarcarAssint);
+  document.querySelectorAll('.chk-sint').forEach((c) => c.addEventListener('change', aoMarcarSint));
+  document.querySelectorAll('.chk-risco,.chk-fator').forEach((c) => c.addEventListener('change', mostrarTriagem));
+  $('btn-salvar-triagem').addEventListener('click', salvarTriagem);
+  $('exame-tipo').addEventListener('change', montarResultados);
+  $('exame-resultado').addEventListener('change', mostrarPreviaExame);
+  $('form-exame').addEventListener('submit', salvarExame);
+  $('prontuario-exames').addEventListener('click', excluirExame);
+  $('btn-print').addEventListener('click', imprimirProntuario);
+  $('btn-export').addEventListener('click', () => exportar(true));
+  $('btn-export-um').addEventListener('click', () => exportar(false));
+  $('btn-import').addEventListener('click', () => $('file-import').click());
+  $('file-import').addEventListener('change', (e) => { if (e.target.files[0]) importar(e.target.files[0]); e.target.value = ''; });
+  $('btn-clear').addEventListener('click', apagarTudo);
+  atualizarBanner(); renderLista(); montarResultados();
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
 </body>
 </html>
