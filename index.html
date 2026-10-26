@@ -43,11 +43,13 @@ body{background:var(--bg);color:var(--texto);font-family:var(--font-ui);line-hei
 .home{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 20px 40px;text-align:center}
 .top-brand{position:absolute;top:36px;left:50%;transform:translateX(-50%);font-family:var(--font-display);font-weight:700;color:var(--muda);letter-spacing:5px;font-size:14px;text-transform:uppercase;white-space:nowrap}
 .title-box{display:flex;align-items:center;justify-content:center;gap:15px;margin-bottom:20px;flex-wrap:wrap}
-.intestine-icon{width:80px;height:80px}
-.title-tina{font-family:'Cinzel Decorative',var(--font-display);font-size:102px;font-weight:900;line-height:1;letter-spacing:-1px}
-.title-ccr{font-family:'Playfair Display',Georgia,serif;font-size:90px;font-weight:700;color:var(--azul);line-height:1}
-.subtitle-main{font-family:var(--font-display);font-size:19px;font-weight:700;letter-spacing:3px;text-transform:uppercase;max-width:850px;margin-bottom:12px;line-height:1.4}
+.intestine-icon{height:96px;width:auto}
+.title-tina{font-family:'bad-horse',var(--font-display);font-size:102px;font-weight:900;line-height:1;letter-spacing:-1px}
+.title-ccr{height:84px;width:auto;display:block}
+.subtitle-main{font-family:'cinzel', 'Cinzel',var(--font-display);font-size:19px;font-weight:700;letter-spacing:3px;text-transform:uppercase;max-width:850px;margin-bottom:12px;line-height:1.4}
 .subtitle-sub{font-size:15px;font-weight:600;color:var(--azul);font-variant:small-caps;letter-spacing:4px;margin-bottom:40px}
+.brand-h1{margin-bottom:40px;display:flex;justify-content:center}
+.brand-logo{width:min(560px,90vw);height:auto;display:block}
 .btn-iniciar{background:linear-gradient(135deg,var(--azul-forte),var(--indigo));color:#fff;font-family:var(--font-display);font-size:21px;font-weight:700;padding:18px 60px;border-radius:50px;border:2px solid rgba(255,255,255,.45);box-shadow:0 0 30px rgba(107,160,215,.5);cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:transform .25s,box-shadow .25s}
 .btn-iniciar:hover{transform:scale(1.04);box-shadow:0 0 45px rgba(75,102,255,.85)}
 .home-aviso{max-width:720px;margin-top:36px;font-size:12.5px;color:var(--muda);line-height:1.6}
@@ -60,8 +62,8 @@ body{background:var(--bg);color:var(--texto);font-family:var(--font-ui);line-hei
 .patient-meta{font-size:13px;color:var(--texto-2);margin-top:2px}
 .app-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--borda);margin-bottom:24px}
 .app-brand{display:flex;align-items:center;gap:10px;background:none;border:0;color:inherit;cursor:pointer}
-.tina-sm{font-family:'Cinzel Decorative',var(--font-display);font-size:26px;font-weight:900}
-.ccr-sm{font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:700;color:var(--azul)}
+.tina-sm{font-family:'bad-horse',var(--font-display);font-size:26px;font-weight:900}
+.ccr-sm{height:22px;width:auto;display:block}
 .tablist{display:flex;gap:8px;flex-wrap:wrap}
 .tab-btn{display:flex;align-items:center;gap:8px;background:rgba(15,23,42,.7);border:1px solid var(--borda);color:var(--texto-2);padding:10px 16px;border-radius:25px;font:600 13.5px var(--font-ui);cursor:pointer;transition:background .2s,color .2s}
 .tab-btn:hover{border-color:var(--azul);color:#fff}
@@ -152,7 +154,7 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
 
 /* 7. UTILITÁRIOS / RESPONSIVO */
 @media (max-width:768px){
-  .title-tina{font-size:64px}.title-ccr{font-size:56px}.subtitle-main{font-size:15px}.subtitle-sub{font-size:13px}
+  .title-tina{font-size:64px}.title-ccr{height:54px}.intestine-icon{height:64px}.subtitle-main{font-size:15px}.subtitle-sub{font-size:13px}
   .btn-iniciar{font-size:17px;padding:15px 44px}.tablist{flex-direction:column;width:100%}.tab-btn{width:100%;justify-content:center}
   .top-brand{font-size:12px;letter-spacing:3px}
 }
@@ -203,15 +205,7 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
 <!-- ============================ TELA INICIAL ============================ -->
 <section id="screen-home" class="home" aria-label="Tela inicial">
   <div class="top-brand">UNICAMP &nbsp;•&nbsp; COTUCA</div>
-  <div class="title-box">
-    <svg class="intestine-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-      <path d="M20 16C20 12.7 22.7 10 26 10H38C41.3 10 44 12.7 44 16V18C44 21.3 41.3 24 38 24H26C22.7 24 20 26.7 20 30V32C20 35.3 22.7 38 26 38H38C41.3 38 44 40.7 44 44V46C44 49.3 41.3 52 38 52H32" stroke="#6BA0D7" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="32" cy="52" r="3.5" fill="#6BA0D7"/>
-    </svg>
-    <h1 style="display:contents"><span class="title-tina">TINA</span><span class="title-ccr">CCR</span><span class="sr-only"> — Triagem e Identificação de Neoplasias na Atenção Primária à Saúde</span></h1>
-  </div>
-  <p class="subtitle-main">Triagem e Identificação de Neoplasias na Atenção Primária à Saúde</p>
-  <p class="subtitle-sub">Versão Câncer Colorretal</p>
+  <h1 class="brand-h1"><img class="brand-logo" src="images/tinaCCR.png" alt="TINA CCR — Triagem e Identificação de Neoplasias na Atenção Primária à Saúde — Versão Câncer Colorretal"></h1>
   <button type="button" class="btn-iniciar" id="btn-iniciar">Iniciar triagem</button>
   <p class="home-aviso">Ferramenta de apoio à decisão para profissionais de enfermagem da Atenção Primária. Não substitui a avaliação clínica nem os protocolos locais. Projeto acadêmico: não utilize dados reais de pacientes sem a devida autorização institucional e adequação à LGPD.</p>
 </section>
@@ -238,7 +232,7 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
 
   <nav class="app-nav" aria-label="Navegação principal">
     <button type="button" class="app-brand" id="btn-home" aria-label="Voltar à tela inicial do TINA CCR">
-      <span class="tina-sm">TINA</span><span class="ccr-sm">CCR</span>
+      <span class="tina-sm">TINA</span><img class="ccr-sm" src="images/ccrTina.png" alt="CCR">
     </button>
     <div class="tablist" role="tablist" aria-label="Módulos do sistema">
       <button type="button" class="tab-btn" role="tab" id="tab-btn-cadastro" aria-controls="tab-cadastro" aria-selected="true" data-tab="cadastro"><svg class="ic"><use href="#i-user"/></svg>1. Cadastro e-SUS / CNS</button>
