@@ -104,10 +104,14 @@ table.data{width:100%;border-collapse:collapse;background:rgba(15,23,42,.9);bord
 table.data th,table.data td{padding:11px 14px;text-align:left;font-size:13.5px;border-bottom:1px solid rgba(107,160,215,.15);vertical-align:top}
 table.data th{background:var(--surface-2);color:var(--azul);font-family:var(--font-display)}
 table.data tr.row-ativo{background:rgba(107,160,215,.15)}
+table.data tr.linha-pac{cursor:pointer}
+table.data tr.linha-pac:hover{background:rgba(107,160,215,.1)}
 .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid}
 .pill.alert{background:rgba(127,29,29,.5);border-color:var(--erro);color:#FECACA}
 .pill.warn{background:rgba(120,53,15,.5);border-color:var(--warn);color:#FDE68A}
 .pill.ok{background:rgba(6,78,59,.5);border-color:var(--ok);color:#A7F3D0}
+.pill.gray{background:rgba(71,85,105,.5);border-color:#94A3B8;color:#E2E8F0}
+.pill.max{background:rgba(88,28,135,.55);border-color:#C084FC;color:#F3E8FF}
 .pill.info{background:rgba(30,58,138,.5);border-color:var(--azul);color:#BFDBFE}
 .empty{padding:22px;border:1px dashed var(--borda);border-radius:12px;color:var(--texto-2);text-align:center}
 .dados-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;background:rgba(0,0,0,.4);padding:18px;border-radius:10px;border:1px solid rgba(107,160,215,.2);margin-bottom:24px}
@@ -219,7 +223,7 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
 
   <div class="patient-bar" id="patient-banner">
     <div class="patient-info">
-      <span class="badge-ativo">Paciente ativo</span>
+      <span class="badge-ativo">Paciente selecionado</span>
       <div>
         <strong id="active-name" style="font-size:16px">Nenhum paciente selecionado</strong>
         <div class="patient-meta">
@@ -288,8 +292,8 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
         </form>
       </div>
 
-      <div class="card">
-        <h3>Pacientes cadastrados na unidade</h3>
+      <div class="card" id="card-pacientes">
+        <h3>Pacientes cadastrados</h3>
         <div class="field" style="margin-bottom:6px">
           <label for="search-paciente">Buscar por nome, CNS ou CPF</label>
           <input id="search-paciente" class="control" type="search" placeholder="Digite para filtrar…" autocomplete="off">
@@ -319,14 +323,14 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
     <section id="tab-triagem" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-triagem" tabindex="0" hidden>
       <div class="card">
         <h2>2. Triagem clínica e estratificação de risco</h2>
-        <div id="triagem-vazio" class="empty" hidden>Nenhum paciente ativo. Selecione ou cadastre um paciente na aba <strong>1. Cadastro</strong> para realizar a triagem.</div>
+        <div id="triagem-vazio" class="empty" hidden>Nenhum paciente selecionado. Selecione ou cadastre um paciente na aba <strong>1. Cadastro</strong> para realizar a triagem.</div>
         <div id="triagem-corpo">
           <form id="form-triagem" novalidate>
             <div class="form-grid">
               <div class="field"><label for="tri-data">Data do atendimento <span class="req">*</span></label>
                 <input id="tri-data" class="control" type="date" aria-describedby="err-tri-data" required>
                 <span class="err" id="err-tri-data"></span></div>
-              <div class="field" id="box-inicio" hidden><label for="tri-inicio">Início dos sintomas (se souber)</label>
+              <div class="field" id="box-inicio" hidden><label for="tri-inicio">Início dos sintomas <span class="req">*</span></label>
                 <input id="tri-inicio" class="control" type="date" aria-describedby="err-tri-inicio">
                 <span class="hint">Se não souber o dia exato, informe uma data aproximada.</span>
                 <span class="err" id="err-tri-inicio"></span></div>
@@ -352,9 +356,11 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
               <legend style="color:var(--warn)">Etapa B — Alto risco (hereditário ou clínico)</legend>
               <p class="hint">Pessoas nestas condições não seguem o rastreamento populacional com FIT: seguem protocolo específico.</p>
               <div class="check-grid">
-                <label class="check"><input type="checkbox" class="chk-risco" value="Síndrome de Lynch ou polipose adenomatosa familiar (FAP) — pessoal ou familiar"><span>Síndrome de Lynch (CCRNP) ou Polipose Adenomatosa Familiar (FAP) — diagnóstico pessoal ou familiar</span></label>
+                <label class="check"><input type="checkbox" class="chk-risco" value="Síndrome de Lynch (CCRNP) — pessoal ou familiar"><span>Síndrome de Lynch (CCRNP) — diagnóstico pessoal ou familiar</span></label>
+                <label class="check"><input type="checkbox" class="chk-risco" value="Polipose adenomatosa familiar (FAP) — pessoal ou familiar"><span>Polipose Adenomatosa Familiar (FAP) — diagnóstico pessoal ou familiar</span></label>
                 <label class="check"><input type="checkbox" class="chk-risco" value="Doença inflamatória intestinal (colite ulcerativa ou doença de Crohn)"><span>Doença Inflamatória Intestinal (colite ulcerativa ou doença de Crohn)</span></label>
-                <label class="check"><input type="checkbox" class="chk-risco" value="Histórico familiar de câncer colorretal em parente de 1º grau"><span>Histórico familiar de câncer colorretal em parente de 1º grau</span></label>
+                <label class="check"><input type="checkbox" class="chk-risco" value="Histórico familiar de câncer colorretal"><span>Histórico familiar de câncer colorretal</span></label>
+                <label class="check"><input type="checkbox" class="chk-risco" value="Radiação ionizante abdominal/pélvica prévia (como em tratamento de outros cânceres)"><span>Radiação ionizante abdominal/pélvica prévia (como em tratamento de outros cânceres)</span></label>
                 <div><label class="check"><input type="checkbox" id="hp-ccr"><span>Histórico pessoal de câncer colorretal</span></label>
                   <div class="field" id="box-hp-ccr" style="margin-top:8px" hidden><label for="hp-ccr-data">Data do diagnóstico <span class="req">*</span></label>
                     <input id="hp-ccr-data" class="control" type="date" aria-describedby="err-hp-ccr-data">
@@ -370,12 +376,21 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
               <legend>Fatores associados (registro; não alteram a classificação)</legend>
               <div class="check-grid">
                 <label class="check"><input type="checkbox" class="chk-fator" value="Diabetes tipo 2"><span>Diabetes tipo 2</span></label>
-                <label class="check"><input type="checkbox" class="chk-fator" value="Radioterapia/radiação abdominal ou pélvica prévia"><span>Radiação ionizante abdominal/pélvica prévia</span></label>
+                <label class="check"><input type="checkbox" class="chk-fator" value="Colecistectomia prévia"><span>Colecistectomia prévia</span></label>
+              </div>
+            </fieldset>
+
+            <fieldset style="margin-top:26px">
+              <legend>Estilo de vida (registro; não altera a classificação)</legend>
+              <div class="check-grid">
+                <label class="check"><input type="checkbox" class="chk-estilo" value="Tabagismo"><span>Tabagismo</span></label>
+                <label class="check"><input type="checkbox" class="chk-estilo" value="Etilismo"><span>Etilismo</span></label>
+                <label class="check"><input type="checkbox" class="chk-estilo" value="Sedentarismo"><span>Sedentarismo</span></label>
               </div>
             </fieldset>
 
             <div class="field" style="margin-top:26px">
-              <label for="tri-obs">Outras doenças de interesse clínico e informações adicionais (opcional)</label>
+              <label for="tri-obs">Informações adicionais (opcional)</label>
               <textarea id="tri-obs" class="control" rows="3" maxlength="1000" placeholder="Ex.: outras doenças, medicamentos em uso, observações relevantes para o cuidado…"></textarea>
             </div>
             <div class="err" id="err-triagem" role="alert" style="margin-top:12px"></div>
@@ -396,14 +411,14 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
         <ul>
           <li>O <strong>FIT</strong> é o teste de referência no SUS para <strong>assintomáticos de 50 a 75 anos</strong> (a cada 2 anos). Não é indicado para investigar quem já tem sintomas.</li>
           <li>Resultado <strong>positivo</strong> no FIT: encaminhar para <strong>colonoscopia</strong> (Atenção Especializada, via regulação).</li>
-          <li>Colonoscopia <strong>normal</strong> em risco habitual: repetir apenas após <strong>10 anos</strong>, se o paciente se mantiver assintomático; com <strong>75 anos ou mais</strong>, a repetição exige avaliação individualizada. <strong>Não é necessário realizar FIT no intervalo</strong> entre as colonoscopias.</li>
+          <li>Colonoscopia <strong>normal</strong> em risco habitual: repetir apenas após <strong>10 anos</strong>, se o paciente se mantiver assintomático; de <strong>76 a 85 anos</strong>, a repetição exige avaliação individualizada. <strong>Não é necessário realizar FIT no intervalo</strong> entre as colonoscopias.</li>
           <li>Retossigmoidoscopia normal: <strong>5 anos</strong> (SBOC). Alto risco segue protocolo específico.</li>
         </ul>
       </div>
 
       <div class="card">
         <h2>3. Lançamento e laudo de exames</h2>
-        <div id="exames-vazio" class="empty" hidden>Nenhum paciente ativo. Selecione um paciente na aba <strong>1. Cadastro</strong>.</div>
+        <div id="exames-vazio" class="empty" hidden>Nenhum paciente selecionado. Selecione um paciente na aba <strong>1. Cadastro</strong>.</div>
         <div id="exames-corpo">
           <form id="form-exame" novalidate>
             <div class="form-grid">
@@ -411,7 +426,7 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
                 <select id="exame-tipo" class="control" aria-describedby="err-exame-tipo">
                   <option value="">Selecione o exame…</option>
                   <option value="FIT">SOF — FIT (imunoquímico) — preferencial</option>
-                  <option value="g-FOBT">SOF — g-FOBT (guaiaco) — método anterior; usar só se FIT indisponível</option>
+                  <option value="g-FOBT">SOF — g-FOBT (guaiaco) — usar na ausência de FIT</option>
                   <option value="Colonoscopia">Colonoscopia (Atenção Especializada)</option>
                   <option value="Retossigmoidoscopia">Retossigmoidoscopia (Atenção Especializada)</option>
                 </select><span class="err" id="err-exame-tipo"></span></div>
@@ -439,7 +454,7 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
       <div class="card">
         <h2>4. Prontuário eletrônico do paciente (e-SUS APS)</h2>
         <p class="print-only" id="print-cabecalho"></p>
-        <div id="prontuario-vazio" class="empty" hidden>Nenhum paciente ativo. Selecione um paciente na aba <strong>1. Cadastro</strong>.</div>
+        <div id="prontuario-vazio" class="empty" hidden>Nenhum paciente selecionado. Selecione um paciente na aba <strong>1. Cadastro</strong>.</div>
         <div id="prontuario-corpo">
           <div class="btn-row no-print" style="margin-bottom:16px">
             <button type="button" class="btn btn-ghost btn-sm" id="btn-print"><svg class="ic"><use href="#i-print"/></svg>Imprimir prontuário</button>
@@ -468,10 +483,10 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
             <tbody>
               <tr><th scope="row">1. Acolhimento</th><td>População adscrita à UBS</td><td>Busca ativa, anamnese e avaliação de sinais e sintomas</td><td>Atenção Primária (UBS)</td></tr>
               <tr><th scope="row">Sintomático (sinais de alerta)</th><td>Sangramento retal, alteração do hábito intestinal, perda de peso, anemia (em qualquer idade)</td><td>Acionar o médico da equipe e encaminhar para investigação diagnóstica (FIT não se aplica)</td><td><strong>Atenção Especializada</strong> (colonoscopia preferencial)</td></tr>
-              <tr><th scope="row">Alto risco</th><td>Lynch, FAP, DII, histórico familiar (1º grau) ou pessoal de CCR/pólipos adenomatosos</td><td>Identificar e registrar predisposição; não aplicar rastreamento populacional</td><td><strong>Gastroenterologia / Especializada</strong></td></tr>
-              <tr><th scope="row">Risco habitual &lt; 50 anos</th><td>Assintomático, sem alto risco</td><td>Promoção da saúde (alimentação, atividade física, álcool, tabaco)</td><td>Acompanhamento na UBS</td></tr>
-              <tr><th scope="row">Rastreamento bienal (50 a 75 anos)</th><td>Assintomático, risco habitual</td><td>Solicitar <strong>FIT</strong> a cada 2 anos (kit de coleta domiciliar, sem preparo)</td><td>Laboratório de análises</td></tr>
-              <tr><th scope="row">&gt; 75 a 85 anos</th><td>Assintomático</td><td>Decisão individualizada com o médico (expectativa de vida e comorbidades)</td><td>Avaliação médica na UBS</td></tr>
+              <tr><th scope="row">Alto risco</th><td>Lynch, FAP, DII, histórico familiar de CCR, radiação ionizante abdominal/pélvica prévia ou histórico pessoal de CCR/pólipos adenomatosos</td><td>Identificar e registrar predisposição; não aplicar rastreamento populacional</td><td><strong>Gastroenterologia / Especializada</strong></td></tr>
+              <tr><th scope="row">Baixo risco &lt; 50 anos</th><td>Assintomático, sem alto risco</td><td>Promoção da saúde (alimentação, atividade física, álcool, tabaco)</td><td>Acompanhamento na UBS</td></tr>
+              <tr><th scope="row">Risco habitual: rastreamento bienal (50 a 75 anos)</th><td>Assintomático, sem alto risco</td><td>Solicitar <strong>FIT</strong> a cada 2 anos (kit de coleta domiciliar, sem preparo)</td><td>Laboratório de análises</td></tr>
+              <tr><th scope="row">76 a 85 anos</th><td>Assintomático</td><td>Decisão individualizada com o médico (expectativa de vida e comorbidades)</td><td>Avaliação médica na UBS</td></tr>
               <tr><th scope="row">&gt; 85 anos</th><td>Assintomático</td><td>Rastreamento não indicado: o tempo de evolução do pólipo costuma superar a expectativa de vida e os riscos da colonoscopia (FIT positivo exige colonoscopia) superam os benefícios</td><td>Acompanhamento na UBS. Se houver sintomas: avaliação médica e conduta individualizada, independentemente da idade</td></tr>
               <tr><th scope="row">FIT positivo (+)</th><td>Sangue oculto detectado</td><td>Regulação para exame confirmatório</td><td><strong>Atenção Especializada (colonoscopia)</strong></td></tr>
               <tr><th scope="row">FIT negativo (−)</th><td>Sem sangue oculto</td><td>Registrar e agendar novo FIT em 2 anos</td><td>Acompanhamento na UBS</td></tr>
@@ -487,14 +502,16 @@ dialog p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
   </main>
 
   <footer class="app-footer">
-    <p><strong>TINA CCR — versão 5.0</strong> · UNICAMP / COTUCA · Autores: <strong>Ana Livia Ferreira</strong> e <strong>Thierry Alexandre da Silva</strong></p>
+    <p><strong>TINA CCR</strong> · UNICAMP / COTUCA · Autores: <strong>Ana Livia Ferreira</strong> e <strong>Thierry Alexandre da Silva</strong></p>
     <p style="margin-top:8px"><strong>Fontes consultadas:</strong></p>
     <ul>
-      <li><a href="https://www.gov.br/inca/pt-br/assuntos/noticias/2026/sus-adota-novo-exame-para-detectar-cancer-de-intestino-antes-dos-sintomas" target="_blank" rel="noopener noreferrer">INCA / Ministério da Saúde — novo protocolo de rastreamento do câncer colorretal no SUS (21/05/2026)</a></li>
+      <li><a href="https://www.gov.br/inca/pt-br/assuntos/noticias/2026/sus-inclui-teste-de-alta-tecnologia-para-rastreamento-de-cancer-colorretal" target="_blank" rel="noopener noreferrer">INCA / Ministério da Saúde — SUS inclui teste de alta tecnologia para rastreamento de câncer colorretal</a></li>
       <li><a href="https://www.gov.br/conitec/pt-br/midias/consultas/relatorios/2026/relatorio-preliminar-diretrizes-brasileiras-do-rastreamento-do-cancer-de-colon-e-reto-cp-20/@@display-file/file" target="_blank" rel="noopener noreferrer">Conitec — Relatório preliminar das Diretrizes Brasileiras do Rastreamento do CCR (Consulta Pública nº 20/2026)</a></li>
-      <li><a href="https://www.gov.br/conitec/pt-br/midias/artigos_publicacoes/ddt_colorretal__26092014.pdf/@@display-file/file" target="_blank" rel="noopener noreferrer">Portaria SAS/MS nº 958/2014 — Diretrizes Diagnósticas e Terapêuticas do Carcinoma Colorretal</a></li>
-      <li><a href="https://www.gov.br/conitec/pt-br/midias/protocolos/2026/pcdt-resumido/PCDT_Resumido_Adenocarcinoma_Clon_Retof.pdf" target="_blank" rel="noopener noreferrer">Conitec — PCDT do Adenocarcinoma de Cólon e Reto (resumido)</a></li>
+      <li><a href="https://www.gov.br/saude/pt-br/assuntos/pcdt/a/adenocarcinoma-de-colon-e-de-reto" target="_blank" rel="noopener noreferrer">Ministério da Saúde — PCDT do Adenocarcinoma de Cólon e de Reto</a></li>
       <li><a href="https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-C%E2%94%9C%E2%94%82lon-doen%E2%94%9Coa-localizada-v6-VERS%E2%94%9CaO-FINAL.pdf" target="_blank" rel="noopener noreferrer">SBOC — Diretrizes de Tratamentos Oncológicos 2026 (intervalos de rastreio)</a></li>
+      <li><a href="https://www.gov.br/inca/pt-br/assuntos/cancer/tipos/intestino" target="_blank" rel="noopener noreferrer">INCA — Câncer de intestino</a></li>
+      <li><a href="https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening" target="_blank" rel="noopener noreferrer">USPSTF — Colorectal Cancer: Screening</a></li>
+      <li><a href="https://saude.df.gov.br/documents/37101/0/Protocolo+de+A%C3%A7%C3%A3o+Programatica+no+C%C3%A2ncer+Colorretal_Preven%C3%A7%C3%A3o+e+Rastreamento.pdf/40c9872e-5690-90a7-644d-a59ca5009ad8?t=1744819927721" target="_blank" rel="noopener noreferrer">SES-DF — Protocolo de Ação Programática no Câncer Colorretal: Prevenção e Rastreamento</a></li>
     </ul>
     <p>Ferramenta de apoio à decisão: não substitui julgamento clínico, protocolos locais nem a regulação. Conteúdo clínico conforme as fontes acima na data de consulta (outubro/2026); o relatório da Conitec citado era preliminar.</p>
   </footer>
@@ -551,9 +568,10 @@ function calcIdade(nascISO, ref) {
 }
 function addAnos(iso, anos) { const d = parseISO(iso); d.setFullYear(d.getFullYear() + anos); return toISO(d); }
 function novoId(p) { return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-function nomeArquivo(n) {                       // TINA-CCR_Prontuário_Nomecompleto
+function nomeArquivo(n, nasc) {                 // TINA-CCR_Prontuário_Nomecompleto_DDMMAAAA
   const nm = String(n || '').replace(/[\\/:*?"<>|]+/g, ' ').split(/\s+/).filter(Boolean).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
-  return 'TINA-CCR_Prontuário_' + (nm || 'Paciente');
+  const dn = parseISO(nasc) ? '_' + nasc.slice(8, 10) + nasc.slice(5, 7) + nasc.slice(0, 4) : '';
+  return 'TINA-CCR_Prontuário_' + (nm || 'Paciente') + dn;
 }
 function fmtCPF(v) { const d = digits(v).slice(0, 11); return d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1-$2'); }
 function fmtCNS(v) { const d = digits(v).slice(0, 15); return d.replace(/^(\d{3})(\d)/, '$1 $2').replace(/^(\d{3}) (\d{4})(\d)/, '$1 $2 $3').replace(/^(\d{3}) (\d{4}) (\d{4})(\d)/, '$1 $2 $3 $4'); }
@@ -633,7 +651,7 @@ function statusLegado(txt) {
   if (/SOF Negativo/i.test(t)) return 'FIT_NEGATIVO';
   if (/Sintom/i.test(t)) return 'SINTOMATICO';
   if (/Alto Risco/i.test(t)) return 'ALTO_RISCO';
-  if (/Acompanhamento UBS/i.test(t)) return 'RISCO_HABITUAL';
+  if (/Acompanhamento UBS/i.test(t)) return 'BAIXO_RISCO';
   if (/Aguardando Exame/i.test(t)) return 'ELEGIVEL_RASTREIO';
   return 'AGUARDANDO_TRIAGEM';
 }
@@ -652,17 +670,18 @@ function normalizarPaciente(o) {               // garante estrutura e tipos (tam
       data: s(o.triagem.data, 40), dataAtendimento: parseISO(o.triagem.dataAtendimento) ? o.triagem.dataAtendimento : '',
       inicioSintomas: parseISO(o.triagem.inicioSintomas) ? o.triagem.inicioSintomas : '', observacoes: s(o.triagem.observacoes, 1000),
       historicoPessoal: Array.isArray(o.triagem.historicoPessoal) ? o.triagem.historicoPessoal.map((x) => ({ tipo: s(x.tipo, 40), data: parseISO(x.data) ? x.data : '' })) : [],
-      codigo: s(o.triagem.codigo, 30), classificacao: s(o.triagem.classificacao, 200),
+      codigo: s(o.triagem.codigo, 30) === 'RISCO_HABITUAL' ? 'BAIXO_RISCO' : s(o.triagem.codigo, 30), classificacao: s(o.triagem.classificacao, 200),
       sintomas: Array.isArray(o.triagem.sintomas) ? o.triagem.sintomas.map((x) => s(x, 200)) : [],
       riscos: Array.isArray(o.triagem.riscos) ? o.triagem.riscos.map((x) => s(x, 200)) : [],
       fatores: Array.isArray(o.triagem.fatores) ? o.triagem.fatores.map((x) => s(x, 200)) : [],
+      estiloVida: Array.isArray(o.triagem.estiloVida) ? o.triagem.estiloVida.map((x) => s(x, 60)) : [],
       idadeNaTriagem: Number.isFinite(+o.triagem.idadeNaTriagem) ? +o.triagem.idadeNaTriagem : null
     } : null,
     exames: Array.isArray(o.exames) ? o.exames.map((e) => ({
       id: s(e.id) || novoId('EX'), tipo: s(e.tipo, 30), resultado: s(e.resultado, 60),
       data: parseISO(e.data) ? e.data : hojeISO(), obs: s(e.obs, 1000), registradoEm: s(e.registradoEm, 40)
     })).filter((e) => TIPOS_EXAME[e.tipo]) : [],
-    statusLegado: s(o.statusLegado, 30),
+    statusLegado: s(o.statusLegado, 30) === 'RISCO_HABITUAL' ? 'BAIXO_RISCO' : s(o.statusLegado, 30),
     historico: Array.isArray(o.historico) ? o.historico.map((h) => ({ id: s(h.id) || novoId('H'), quando: s(h.quando, 60), titulo: s(h.titulo, 200), detalhes: s(h.detalhes, 1500) })) : [],
     criadoEm: s(o.criadoEm, 40) || new Date().toISOString()
   };
@@ -711,16 +730,16 @@ const TIPOS_EXAME = { 'FIT': 'FIT (imunoquímico)', 'g-FOBT': 'g-FOBT (guaiaco)'
 const STATUS = {
   AGUARDANDO_TRIAGEM: ['Aguardando triagem', 'info'],
   SINTOMATICO: ['Sintomático — colonoscopia diagnóstica indicada', 'alert'],
-  ALTO_RISCO: ['Alto risco — encaminhar à especializada', 'warn'],
-  RISCO_HABITUAL: ['Risco habitual (< 50 anos) — acompanhamento UBS', 'info'],
-  ELEGIVEL_RASTREIO: ['Elegível ao rastreamento — aguardando FIT', 'ok'],
-  AVALIACAO_INDIVIDUAL: ['75 a 85 anos — decisão individualizada', 'warn'],
-  SEM_RASTREIO_85: ['Acima de 85 anos — rastreamento não indicado', 'warn'],
+  ALTO_RISCO: ['Alto risco — encaminhar à Atenção Especializada / Gastroenterologia', 'warn'],
+  BAIXO_RISCO: ['Baixo risco (< 50 anos) — acompanhamento UBS', 'info'],
+  ELEGIVEL_RASTREIO: ['Risco habitual — elegível ao rastreamento (aguardando FIT)', 'ok'],
+  AVALIACAO_INDIVIDUAL: ['76 a 85 anos — decisão individualizada', 'gray'],
+  SEM_RASTREIO_85: ['Acima de 85 anos — rastreamento não indicado', 'gray'],
   FIT_NEGATIVO: ['FIT negativo — rastreio bienal', 'ok'],
   FIT_POSITIVO: ['FIT positivo — encaminhar à colonoscopia', 'alert'],
   ENDO_NORMAL: ['Exame endoscópico normal', 'ok'],
   ENDO_POLIPO: ['Pólipo/adenoma ressecado — vigilância', 'warn'],
-  NEOPLASIA: ['Neoplasia confirmada — oncologia', 'alert']
+  NEOPLASIA: ['Neoplasia confirmada — oncologia', 'max']
 };
 
 function classificar(idade, sintomas, riscos) {
@@ -733,7 +752,7 @@ function classificar(idade, sintomas, riscos) {
     html: '<p>Condição que <strong>exclui o rastreamento populacional com FIT</strong> (Diretrizes Brasileiras de Rastreamento — Conitec/MS).</p>' +
       '<ul><li>Encaminhar para a <strong>Atenção Especializada / Gastroenterologia</strong> (SISREG) para estratégia individualizada (em geral colonoscopia com intervalos e idade de início específicos), <strong>independentemente da idade</strong>.</li>' +
       '<li>Registrar história familiar e/ou diagnóstico no prontuário; considerar aconselhamento genético quando disponível.</li></ul>' };
-  if (idade < 50) return { cod: 'RISCO_HABITUAL', cls: 'res-info', titulo: 'Risco habitual, menos de 50 anos',
+  if (idade < 50) return { cod: 'BAIXO_RISCO', cls: 'res-info', titulo: 'Baixo risco, menos de 50 anos',
     html: '<ul><li>Sem indicação de rastreamento populacional com FIT no momento (faixa do SUS: 50 a 75 anos).</li>' +
       '<li><strong>Promoção da saúde:</strong> alimentação rica em fibras, frutas e vegetais; reduzir carne processada e vermelha, álcool, tabaco e excesso de peso; estimular atividade física.</li>' +
       '<li>Orientar a procurar a UBS diante de qualquer sinal de alerta. Manter acompanhamento na UBS.</li></ul>' };
@@ -741,11 +760,11 @@ function classificar(idade, sintomas, riscos) {
     html: '<ul><li>Depois dos 85 anos, o tempo que um pólipo leva para se transformar em um câncer agressivo costuma ser maior do que a expectativa de vida global do indivíduo.</li>' +
       '<li>No rastreamento, se o FIT der positivo, o próximo passo obrigatório é uma colonoscopia, exame invasivo cujos riscos de complicações (como perfuração intestinal ou problemas cardiovasculares) superam expressivamente os potenciais benefícios preventivos nessa faixa etária.</li>' +
       '<li><strong>Na presença de sintomas</strong>, é necessária avaliação médica e conduta individualizada: o sintoma é um alerta <strong>independente da idade</strong>.</li></ul>' };
-  if (idade > 75) return { cod: 'AVALIACAO_INDIVIDUAL', cls: 'res-warn', titulo: 'Idade de 75 a 85 anos',
+  if (idade > 75) return { cod: 'AVALIACAO_INDIVIDUAL', cls: 'res-warn', titulo: 'Idade de 76 a 85 anos',
     html: '<ul><li>Fora da faixa de rastreamento sistemático do SUS (50 a 75 anos).</li>' +
-      '<li>A decisão de rastrear deve ser <strong>individualizada com o médico</strong>, considerando expectativa de vida e comorbidades (SBOC: 75 a 85 anos).</li>' +
+      '<li>A decisão de rastrear deve ser <strong>individualizada com o médico</strong>, considerando expectativa de vida e comorbidades (76 a 85 anos).</li>' +
       '<li>Se o médico indicar, prosseguir com o <strong>FIT</strong>.</li></ul>' };
-  return { cod: 'ELEGIVEL_RASTREIO', cls: 'res-ok', titulo: 'Elegível ao rastreamento de rotina (assintomático, 50 a 75 anos)',
+  return { cod: 'ELEGIVEL_RASTREIO', cls: 'res-ok', titulo: 'Risco habitual — elegível ao rastreamento de rotina (assintomático, 50 a 75 anos)',
     html: '<ul><li><strong>Conduta:</strong> solicitar o <strong>FIT (teste imunoquímico fecal)</strong>, <strong>bienal</strong> (a cada 2 anos).</li>' +
       '<li>O FIT usa kit de coleta domiciliar, <strong>sem preparo intestinal, sem dieta restritiva e com uma amostra</strong> (INCA/MS).</li>' +
       '<li>Resultado positivo: encaminhar para colonoscopia (Atenção Especializada). Negativo: repetir em 2 anos.</li></ul>' };
@@ -760,20 +779,23 @@ function avaliarExame(tipo, res, ctx) {               // devolve status + bloco 
   const sof = tipo === 'FIT' || tipo === 'g-FOBT';
   if (sof && res.startsWith('Positivo')) return { cod: 'FIT_POSITIVO', cls: 'res-alert', titulo: 'Sangue oculto POSITIVO (' + tipo + ')',
     html: '<ul><li>Detecção de sangue oculto nas fezes.</li><li><strong>Conduta:</strong> regulação para <strong>colonoscopia</strong> na Atenção Especializada (SISREG).</li></ul>' };
-  if (sof && ctx && ctx.nasc && ctx.data && calcIdade(ctx.nasc, parseISO(addAnos(ctx.data, 2))) >= 75) return { cod: 'FIT_NEGATIVO', cls: 'res-warn', titulo: 'Sangue oculto NEGATIVO (' + tipo + ') — 75 anos ou mais',
-    html: '<ul><li>Registrar no prontuário e manter acompanhamento na UBS.</li><li><strong>Não agendar como rastreamento bienal:</strong> na data da próxima repetição de rotina (2 anos) o paciente terá <strong>75 anos ou mais</strong>, e a decisão de refazer o ' + tipo + ' continua <strong>individualizada</strong> (expectativa de vida e comorbidades).</li><li><strong>Próximo exame:</strong> definido pelo especialista.</li></ul>' };
+  const fxR = sof && ctx && ctx.nasc && ctx.data ? faixaRepeticao(ctx.nasc, ctx.data, 2) : 'ok';
+  if (sof && fxR === 'ind') return { cod: 'FIT_NEGATIVO', cls: 'res-warn', titulo: 'Sangue oculto NEGATIVO (' + tipo + ') — próxima repetição aos 76 a 85 anos',
+    html: '<ul><li>Registrar no prontuário e manter acompanhamento na UBS.</li><li><strong>Não agendar como rastreamento bienal:</strong> na data da próxima repetição de rotina (2 anos) o paciente terá <strong>de 76 a 85 anos</strong>, e a decisão de refazer o ' + tipo + ' continua <strong>individualizada</strong> (expectativa de vida e comorbidades).</li><li><strong>Próximo exame:</strong> definido pelo especialista.</li></ul>' };
+  if (sof && fxR === 'nao') return { cod: 'FIT_NEGATIVO', cls: 'res-warn', titulo: 'Sangue oculto NEGATIVO (' + tipo + ') — próxima repetição acima de 85 anos',
+    html: '<ul><li>Registrar no prontuário e manter acompanhamento na UBS.</li><li><strong>Não agendar novo rastreamento:</strong> na data da próxima repetição (2 anos) o paciente terá <strong>mais de 85 anos</strong>, faixa em que o rastreamento não é indicado.</li><li>Na presença de sintomas, é necessária avaliação médica e conduta individualizada, independentemente da idade.</li></ul>' };
   if (sof) return { cod: 'FIT_NEGATIVO', cls: 'res-ok', titulo: 'Sangue oculto NEGATIVO (' + tipo + ')',
     html: '<ul><li>Registrar no prontuário e manter acompanhamento na UBS.</li><li><strong>Próximo exame:</strong> repetir o teste em <strong>2 anos</strong> (rastreamento bienal), mantendo-se assintomático e dentro dos 50–75 anos.</li></ul>' };
   if (res.startsWith('Normal')) {
     if (tipo === 'Colonoscopia') return { cod: 'ENDO_NORMAL', cls: 'res-ok', titulo: 'Colonoscopia normal / sem diagnóstico conclusivo',
       html: '<ul><li><strong>Exame normal: não repetir agora.</strong></li>' +
         '<li>Em <strong>risco habitual</strong>, repetir apenas após <strong>10 anos</strong>, desde que o paciente se mantenha assintomático (Diretrizes Brasileiras de Rastreamento — Conitec).</li>' +
-        '<li>Se o paciente já tiver <strong>75 anos ou mais</strong> (ou os completar até a data da repetição), a necessidade de repetir o exame exige <strong>avaliação individualizada</strong> (expectativa de vida e comorbidades).</li>' +
+        '<li>Se o paciente tiver de <strong>76 a 85 anos</strong> na data da repetição, a necessidade de repetir o exame exige <strong>avaliação individualizada</strong> (expectativa de vida e comorbidades); acima de 85 anos, o rastreamento não é indicado.</li>' +
         '<li><strong>Não é necessário realizar FIT no intervalo</strong> entre as colonoscopias.</li>' +
         '<li>Alto risco ou sintomático: o intervalo segue protocolo específico definido pelo especialista.</li></ul>' };
     return { cod: 'ENDO_NORMAL', cls: 'res-ok', titulo: 'Retossigmoidoscopia normal / sem diagnóstico conclusivo',
       html: '<ul><li><strong>Não repetir agora.</strong> Em <strong>risco habitual</strong>, o próximo exame é indicado após <strong>5 anos</strong>, se permanecer assintomático (SBOC).</li>' +
-        '<li>Com 75 anos ou mais na data da repetição, a necessidade do exame exige avaliação individualizada.</li>' +
+        '<li>De 76 a 85 anos na data da repetição, a necessidade do exame exige avaliação individualizada; acima de 85 anos, não é indicada.</li>' +
         '<li>Para pacientes de alto risco ou sintomáticos, o intervalo segue protocolo específico definido pelo especialista.</li></ul>' };
   }
   if (res.startsWith('Pólipo') && tipo === 'Retossigmoidoscopia') return { cod: 'ENDO_POLIPO', cls: 'res-warn', titulo: 'Pólipo / adenoma identificado',
@@ -795,6 +817,8 @@ function derivarStatus(p) {                      // status calculado a partir do
   if (p.statusLegado && STATUS[p.statusLegado]) return p.statusLegado;
   return 'AGUARDANDO_TRIAGEM';
 }
+function faixaIdade(idade) { return idade > 85 ? 'nao' : idade > 75 ? 'ind' : 'ok'; }     // até 75: rotina · 76–85: individualizar · >85: não indicado
+function faixaRepeticao(nascISO, dataISO, anos) { return faixaIdade(calcIdade(nascISO, parseISO(addAnos(dataISO, anos)))); }
 function proximoExame(p) {
   if (!p.exames.length) return null;
   const ord = [...p.exames].sort((a, b) => a.data.localeCompare(b.data));
@@ -806,8 +830,9 @@ function proximoExame(p) {
   else if (u.tipo === 'Retossigmoidoscopia' && u.resultado.startsWith('Normal') && !risco) { anos = 5; nome = 'nova retossigmoidoscopia'; }
   if (!anos) return null;
   const data = addAnos(u.data, anos);
-  if (calcIdade(p.nascimento, parseISO(data)) >= 75) return { nome, data, atrasado: false, individualizar: true };
-  return { nome, data, atrasado: data < hojeISO(), individualizar: false };
+  const fx = faixaIdade(calcIdade(p.nascimento, parseISO(data)));
+  if (fx !== 'ok') return { nome, data, atrasado: false, individualizar: fx === 'ind', naoIndicado: fx === 'nao' };
+  return { nome, data, atrasado: data < hojeISO(), individualizar: false, naoIndicado: false };
 }
 function ultimoExame(p) {
   if (!p.exames.length) return null;
@@ -818,24 +843,31 @@ function statusInfo(p) {                         // status do cuidado: rótulo +
   const cod = derivarStatus(p), base = STATUS[cod] || STATUS.AGUARDANDO_TRIAGEM;
   const r = { cod, label: base[0], cls: base[1], det: '' };
   if (cod === 'SINTOMATICO') r.det = 'Indicada colonoscopia diagnóstica (Atenção Especializada, via regulação), com avaliação médica e exame proctológico.';
+  const txtFaixa = (prox, nome) => prox.naoIndicado
+    ? 'Na data da próxima repetição (' + fmtData(prox.data) + ') o paciente terá mais de 85 anos: o rastreamento não é indicado. Na presença de sintomas, é necessária avaliação médica independentemente da idade.'
+    : 'Na data da próxima repetição de rotina (' + fmtData(prox.data) + ') o paciente terá de 76 a 85 anos: não é marcado como rastreamento bienal. A decisão de refazer o ' + nome + ' continua individualizada e o próximo exame é definido pelo especialista.';
   if (cod === 'FIT_NEGATIVO' || cod === 'FIT_POSITIVO') {
     const u = ultimoExame(p), g = !!u && u.tipo === 'g-FOBT', nome = g ? 'g-FOBT' : 'FIT', neg = cod === 'FIT_NEGATIVO', prox = neg ? proximoExame(p) : null;
-    if (g) r.label = neg ? 'g-FOBT negativo - rastreio bienal' : 'g-FOBT positivo - encaminhar à colonoscopia';
-    if (prox && prox.individualizar) {
-      r.label = nome + ' negativo' + (g ? ' - ' : ' — ') + 'avaliação individualizada para repetir';
-      r.det = 'Resultado negativo. Na data da próxima repetição de rotina (' + fmtData(prox.data) + ') o paciente terá 75 anos ou mais: não é marcado como rastreamento bienal. A decisão de refazer o ' + nome + ' continua individualizada e o próximo exame é definido pelo especialista.';
+    if (g) r.label = neg ? 'g-FOBT negativo — rastreio bienal' : 'g-FOBT positivo — encaminhar à colonoscopia';
+    if (prox && (prox.individualizar || prox.naoIndicado)) {
+      r.label = nome + ' negativo — ' + (prox.naoIndicado ? 'repetição não indicada (acima de 85 anos)' : 'avaliação individualizada para repetir');
+      r.cls = 'gray';
+      r.det = 'Resultado negativo. ' + txtFaixa(prox, nome);
     }
   }
   if (cod === 'ENDO_POLIPO') { const u = ultimoExame(p); if (u && u.tipo === 'Retossigmoidoscopia') r.label = 'Pólipo/adenoma identificado — encaminhar à colonoscopia'; }
   if (cod === 'ENDO_NORMAL') {
     const u = ultimoExame(p), prox = proximoExame(p), colono = !!u && u.tipo === 'Colonoscopia';
     const nome = colono ? 'Colonoscopia' : 'Retossigmoidoscopia', anos = colono ? 10 : 5;
-    if (prox && prox.individualizar) {
-      r.label = nome + ' normal — avaliação individualizada para repetir';
-      r.det = 'Exame normal / sem diagnóstico conclusivo. Aos 75 anos ou mais, a necessidade de repetir o exame exige avaliação individualizada (expectativa de vida e comorbidades), desde que o paciente se mantenha assintomático.';
+    if (prox && (prox.individualizar || prox.naoIndicado)) {
+      r.label = nome + ' normal — ' + (prox.naoIndicado ? 'repetição não indicada (acima de 85 anos)' : 'avaliação individualizada para repetir');
+      r.cls = 'gray';
+      r.det = 'Exame normal / sem diagnóstico conclusivo. ' + (prox.naoIndicado
+        ? 'Na data em que a repetição seria indicada (' + fmtData(prox.data) + ') o paciente terá mais de 85 anos: o rastreamento não é indicado. Na presença de sintomas, é necessária avaliação médica independentemente da idade.'
+        : 'De 76 a 85 anos, a necessidade de repetir o exame exige avaliação individualizada (expectativa de vida e comorbidades), desde que o paciente se mantenha assintomático.');
     } else if (prox) {
       r.label = nome + ' normal — repetir após ' + anos + ' anos (' + prox.data.slice(0, 4) + ')';
-      r.det = 'Exame normal / sem diagnóstico conclusivo. Repetir apenas após ' + anos + ' anos (em ' + fmtData(prox.data) + '), desde que o paciente se mantenha assintomático. Se completar 75 anos ou mais até lá, a repetição exige avaliação individualizada.' + (colono ? ' Não é necessário realizar FIT no intervalo.' : '');
+      r.det = 'Exame normal / sem diagnóstico conclusivo. Repetir apenas após ' + anos + ' anos (em ' + fmtData(prox.data) + '), desde que o paciente se mantenha assintomático. Se tiver de 76 a 85 anos na data da repetição, ela exige avaliação individualizada.' + (colono ? ' Não é necessário realizar FIT no intervalo.' : '');
     } else {
       r.label = nome + ' normal — intervalo definido pelo especialista';
       r.det = 'Exame normal / sem diagnóstico conclusivo, porém o paciente é sintomático ou de alto risco: o intervalo de repetição segue protocolo específico definido pelo especialista.';
@@ -880,8 +912,8 @@ function renderLista() {
   if (!lista.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muda);padding:18px">' + (pacientes.length ? 'Nenhum paciente encontrado para a busca.' : 'Nenhum paciente cadastrado ainda.') + '</td></tr>'; return; }
   tb.innerHTML = lista.map((p) => {
     const ativo = p.id === ativoId, n = esc(p.nome);
-    return '<tr class="' + (ativo ? 'row-ativo' : '') + '"><td><strong>' + n + '</strong></td><td>' + esc(fmtCNS(p.cns)) + '</td><td>' + esc(cpfMascarado(p.cpf)) + '</td><td>' + calcIdade(p.nascimento) + ' anos</td><td>' + esc(p.esf || '—') + ' / ' + esc(p.ubs || '—') + '</td><td>' + pillStatus(p) + '</td>' +
-      '<td><div class="btn-row"><button type="button" class="btn btn-sm" data-act="sel" data-id="' + esc(p.id) + '" aria-label="Selecionar ' + n + '"' + (ativo ? ' aria-pressed="true"' : '') + '>' + (ativo ? 'Ativo' : 'Selecionar') + '</button>' +
+    return '<tr class="linha-pac' + (ativo ? ' row-ativo' : '') + '" data-id="' + esc(p.id) + '"><td><strong>' + n + '</strong></td><td>' + esc(fmtCNS(p.cns)) + '</td><td>' + esc(cpfMascarado(p.cpf)) + '</td><td>' + calcIdade(p.nascimento) + ' anos</td><td>' + esc(p.esf || '—') + ' / ' + esc(p.ubs || '—') + '</td><td>' + pillStatus(p) + '</td>' +
+      '<td><div class="btn-row"><button type="button" class="btn btn-sm" data-act="sel" data-id="' + esc(p.id) + '" aria-label="Selecionar ' + n + '"' + (ativo ? ' aria-pressed="true"' : '') + '>' + (ativo ? 'Selecionado' : 'Selecionar') + '</button>' +
       '<button type="button" class="btn btn-sm btn-ghost" data-act="edit" data-id="' + esc(p.id) + '" aria-label="Editar ' + n + '"><svg class="ic"><use href="#i-edit"/></svg></button>' +
       '<button type="button" class="btn btn-sm btn-ghost" data-act="del" data-id="' + esc(p.id) + '" aria-label="Excluir ' + n + '"><svg class="ic"><use href="#i-trash"/></svg></button></div></td></tr>';
   }).join('');
@@ -937,11 +969,12 @@ function salvarCadastro(e) {
   }
 }
 async function acaoLista(ev) {
-  const b = ev.target.closest('button[data-act]'); if (!b) return;
-  const id = b.dataset.id, p = pacientes.find((x) => x.id === id); if (!p) return;
-  if (b.dataset.act === 'sel') { ativoId = id; salvar(); renderLista(); atualizarBanner(); toast('Paciente selecionado: ' + p.nome, 'ok'); trocarAba('triagem', true); }
-  else if (b.dataset.act === 'edit') editarPaciente(id);
-  else if (b.dataset.act === 'del') {
+  const b = ev.target.closest('button[data-act]'), tr = ev.target.closest('tr[data-id]');
+  const id = b ? b.dataset.id : tr ? tr.dataset.id : null; if (!id) return;
+  const act = b ? b.dataset.act : 'sel', p = pacientes.find((x) => x.id === id); if (!p) return;
+  if (act === 'sel') { ativoId = id; salvar(); renderLista(); atualizarBanner(); toast('Paciente selecionado: ' + p.nome, 'ok'); trocarAba('triagem', true); }
+  else if (act === 'edit') editarPaciente(id);
+  else if (act === 'del') {
     if (await confirmar('Excluir paciente?', 'Todo o prontuário de "' + p.nome + '" (triagem, exames e histórico) será apagado deste navegador. Esta ação não pode ser desfeita.', 'Excluir')) {
       pacientes = pacientes.filter((x) => x.id !== id); if (ativoId === id) ativoId = null;
       salvar(); renderLista(); atualizarBanner(); toast('Paciente excluído.', 'info');
@@ -958,7 +991,7 @@ function lerTriagem() {
   if ($('hp-polipo').checked) hp.push({ tipo: 'Pólipos adenomatosos', data: $('hp-polipo-data').value });
   const riscos = pega('.chk-risco');
   hp.forEach((h) => riscos.push('Histórico pessoal de ' + h.tipo.toLowerCase() + (parseISO(h.data) ? ' (diagnóstico em ' + fmtData(h.data) + ')' : '')));
-  return { assint: $('chk-assint').checked, sintomas: pega('.chk-sint'), riscos, hp, fatores: pega('.chk-fator') };
+  return { assint: $('chk-assint').checked, sintomas: pega('.chk-sint'), riscos, hp, fatores: pega('.chk-fator'), estilo: pega('.chk-estilo') };
 }
 function atualizarCamposTriagem() {
   const temSint = !!document.querySelector('.chk-sint:checked');
@@ -1000,9 +1033,9 @@ function salvarTriagem() {
   const dAt = parseISO($('tri-data').value);
   ok = setErr('tri-data', !dAt ? 'Informe a data do atendimento.' : dAt > hoje ? 'A data do atendimento não pode ser futura.' : dAt < nasc ? 'A data do atendimento é anterior ao nascimento do paciente.' : '') && ok;
   const ini = t.sintomas.length ? $('tri-inicio').value : '';
-  if (ini) {
+  if (t.sintomas.length) {
     const dI = parseISO(ini);
-    ok = setErr('tri-inicio', !dI ? 'Data inválida.' : dI > hoje ? 'O início dos sintomas não pode ser futuro.' : dI < nasc ? 'O início dos sintomas é anterior ao nascimento.' : (dAt && dI > dAt) ? 'O início dos sintomas não pode ser posterior à data do atendimento.' : '') && ok;
+    ok = setErr('tri-inicio', !ini ? 'Informe o início dos sintomas.' : !dI ? 'Data inválida.' : dI > hoje ? 'O início dos sintomas não pode ser futuro.' : dI < nasc ? 'O início dos sintomas é anterior ao nascimento.' : (dAt && dI > dAt) ? 'O início dos sintomas não pode ser posterior à data do atendimento.' : '') && ok;
   } else setErr('tri-inicio', '');
   t.hp.forEach((h) => {
     const id = h.tipo === 'Câncer colorretal' ? 'hp-ccr-data' : 'hp-polipo-data', d = parseISO(h.data);
@@ -1011,9 +1044,9 @@ function salvarTriagem() {
   if (!ok) { (document.querySelector('#form-triagem [aria-invalid="true"]') || $('chk-assint')).focus(); toast('Corrija os campos destacados.', 'erro'); return; }
   const idade = calcIdade(p.nascimento, dAt), r = classificar(idade, t.sintomas, t.riscos), obs = $('tri-obs').value.trim();
   p.triagem = { data: new Date().toISOString(), dataAtendimento: $('tri-data').value, inicioSintomas: ini, observacoes: obs, codigo: r.cod, classificacao: r.titulo,
-    sintomas: t.sintomas, riscos: t.riscos, historicoPessoal: t.hp, fatores: t.fatores, idadeNaTriagem: idade };
+    sintomas: t.sintomas, riscos: t.riscos, historicoPessoal: t.hp, fatores: t.fatores, estiloVida: t.estilo, idadeNaTriagem: idade };
   log(p, 'Triagem clínica e de risco realizada', 'Atendimento em ' + fmtData($('tri-data').value) + '. Classificação: ' + r.titulo + '. Idade: ' + idade + ' anos. Sinais: ' + (t.sintomas.length ? t.sintomas.join('; ') : 'assintomático') +
-    (ini ? ' (início em ' + fmtData(ini) + ')' : '') + '. Alto risco: ' + (t.riscos.length ? t.riscos.join('; ') : 'nenhum') + '. Fatores associados: ' + (t.fatores.length ? t.fatores.join('; ') : 'nenhum') +
+    (ini ? ' (início em ' + fmtData(ini) + ')' : '') + '. Alto risco: ' + (t.riscos.length ? t.riscos.join('; ') : 'nenhum') + '. Fatores associados: ' + (t.fatores.length ? t.fatores.join('; ') : 'nenhum') + '. Estilo de vida: ' + (t.estilo.length ? t.estilo.join('; ') : 'nenhum') +
     '. Informações adicionais: ' + (obs || 'nenhuma') + '.');
   salvar(); resetarTriagem(); atualizarBanner();
   toast('Triagem salva no prontuário.', 'ok'); trocarAba('prontuario', true);
@@ -1068,7 +1101,7 @@ function renderProntuario() {
   if (cod === 'FIT_POSITIVO') a = '<div class="result res-alert"><h3><svg class="ic"><use href="#i-alert"/></svg> Alerta crítico de regulação (SISREG / Atenção Especializada)</h3><p>Indicação de encaminhamento para <strong>colonoscopia</strong> após FIT positivo.</p></div>';
   else if (cod === 'SINTOMATICO') a = '<div class="result res-alert"><h3><svg class="ic"><use href="#i-alert"/></svg> Alerta: sinais de alerta presentes</h3><p><strong>Indicada colonoscopia diagnóstica:</strong> encaminhar à Atenção Especializada via regulação (SISREG), com avaliação médica e exame proctológico (toque retal).</p></div>';
   else if (cod === 'NEOPLASIA') a = '<div class="result res-max"><h3><svg class="ic"><use href="#i-alert"/></svg> Alerta máximo: neoplasia confirmada</h3><p>Regulação prioritária para <strong>serviço de oncologia</strong>.</p></div>';
-  if (prox && prox.individualizar) a += '<div class="result res-warn"><h3>Repetição do exame: avaliação individualizada</h3><p>Na data prevista para repetir (' + fmtData(prox.data) + ') o paciente terá <strong>75 anos ou mais</strong>: ' + (prox.nome === 'novo FIT' ? 'a decisão de refazer o FIT continua individualizada e o próximo exame é definido pelo especialista.' : 'a necessidade de repetir o exame deve ser decidida de forma individualizada pelo médico, mantendo-se assintomático.') + '</p></div>';
+  if (prox && (prox.individualizar || prox.naoIndicado)) a += '<div class="result res-warn"><h3>Repetição do exame: ' + (prox.naoIndicado ? 'rastreamento não indicado' : 'avaliação individualizada') + '</h3><p>Na data prevista para repetir (' + fmtData(prox.data) + ') o paciente terá <strong>' + (prox.naoIndicado ? 'mais de 85 anos' : 'de 76 a 85 anos') + '</strong>: ' + (prox.naoIndicado ? 'o rastreamento não é indicado; na presença de sintomas, é necessária avaliação médica independentemente da idade.' : (prox.nome === 'novo FIT' ? 'a decisão de refazer o FIT continua individualizada e o próximo exame é definido pelo especialista.' : 'a necessidade de repetir o exame deve ser decidida de forma individualizada pelo médico, mantendo-se assintomático.')) + '</p></div>';
   else if (prox) a += '<div class="result ' + (prox.atrasado ? 'res-warn' : 'res-ok') + '"><h3>Próximo exame previsto</h3><p>Indicado <strong>' + esc(prox.nome) + '</strong> em <strong>' + fmtData(prox.data) + '</strong>' + (prox.atrasado ? ' — <strong>prazo vencido</strong>, reavaliar.' : '.') + '</p></div>';
   alerta.innerHTML = a;
 
@@ -1082,11 +1115,12 @@ function renderProntuario() {
   const t = p.triagem;
   const lista = (arr) => '<ul>' + arr.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>';
   $('prontuario-triagem').innerHTML = t ? '<div class="result res-info" style="margin-top:6px"><h3>' + esc(t.classificacao) + '</h3>' +
-    '<p>Atendimento em <strong>' + (t.dataAtendimento ? fmtData(t.dataAtendimento) : '—') + '</strong> · registrada em ' + esc(fmtQuando(t.data)) + ' · idade na triagem: ' + esc(t.idadeNaTriagem) + ' anos.</p>' +
+    '<p>Atendimento em <strong>' + (t.dataAtendimento ? fmtData(t.dataAtendimento) : '—') + '</strong> · Registrada em ' + esc(fmtQuando(t.data)) + ' · Idade na triagem: ' + esc(t.idadeNaTriagem) + ' anos.</p>' +
     '<p style="margin-top:8px"><strong>Sinais de alerta:</strong></p>' + (t.sintomas.length ? lista(t.sintomas) : '<p>Assintomático</p>') +
     (t.inicioSintomas ? '<p><strong>Início dos sintomas:</strong> ' + fmtData(t.inicioSintomas) + '</p>' : '') +
     '<p style="margin-top:8px"><strong>Alto risco:</strong></p>' + (t.riscos.length ? lista(t.riscos) : '<p>Nenhum informado</p>') +
     '<p style="margin-top:8px"><strong>Fatores associados:</strong></p>' + ((t.fatores || []).length ? lista(t.fatores) : '<p>Nenhum informado</p>') +
+    '<p style="margin-top:8px"><strong>Estilo de vida:</strong></p>' + ((t.estiloVida || []).length ? lista(t.estiloVida) : '<p>Nenhum informado</p>') +
     (t.observacoes ? '<p style="margin-top:8px"><strong>Informações adicionais:</strong></p><p style="white-space:pre-wrap">' + esc(t.observacoes) + '</p>' : '') +
     (t.codigo === 'SINTOMATICO' ? '<p style="margin-top:10px"><strong>Indicação: colonoscopia diagnóstica</strong> (Atenção Especializada, via regulação/SISREG).</p>' : '') + '</div>'
     : '<p class="hint">Nenhuma triagem registrada para este paciente.</p>';
@@ -1106,9 +1140,8 @@ async function acaoHistorico(ev) {
   if (b.dataset.act !== 'del-h') return;
   const p = getAtivo(); const h = p && p.historico.find((x) => x.id === b.dataset.id); if (!h) return;
   if (!podeExcluirH(h)) { toast('Exclusão disponível apenas até 10 min após o registro', 'erro'); renderProntuario(); return; }
-  if (await confirmar('Excluir registro da linha do tempo?', '"' + h.titulo + '" (' + fmtQuando(h.quando) + '). Apenas este registro do histórico será removido: a triagem e os exames já lançados não são alterados. A remoção ficará registrada na linha do tempo.', 'Excluir')) {
+  if (await confirmar('Excluir registro da linha do tempo?', '"' + h.titulo + '" (' + fmtQuando(h.quando) + '). Apenas este registro do histórico será removido: a triagem e os exames já lançados não são alterados.', 'Excluir')) {
     p.historico = p.historico.filter((x) => x.id !== h.id);
-    log(p, 'Registro da linha do tempo excluído', 'Registro removido: "' + h.titulo + '" (' + fmtQuando(h.quando) + ').');
     salvar(); renderProntuario(); toast('Registro excluído da linha do tempo.', 'info');
   }
 }
@@ -1123,7 +1156,7 @@ async function excluirExame(ev) {
 }
 function imprimirProntuario() {
   const p = getAtivo(), tituloOriginal = document.title;
-  document.title = nomeArquivo(p ? p.nome : '');          // nome sugerido ao salvar como PDF
+  document.title = nomeArquivo(p ? p.nome : '', p ? p.nascimento : '');          // nome sugerido ao salvar como PDF
   document.body.classList.add('print-prontuario');
   const fim = () => { document.body.classList.remove('print-prontuario'); document.title = tituloOriginal; window.removeEventListener('afterprint', fim); };
   window.addEventListener('afterprint', fim); window.print();
@@ -1138,7 +1171,7 @@ function baixarJSON(obj, nome) {
 function exportar(todos) {
   const lista = todos ? pacientes : [getAtivo()].filter(Boolean);
   if (!lista.length) { toast('Nada para exportar.', 'erro'); return; }
-  baixarJSON({ sistema: 'TINA CCR', versao: 5, exportadoEm: new Date().toISOString(), pacientes: lista }, todos ? 'tina-ccr-backup-' + hojeISO() + '.json' : nomeArquivo(lista[0].nome) + '.json');
+  baixarJSON({ sistema: 'TINA CCR', versao: 5, exportadoEm: new Date().toISOString(), pacientes: lista }, todos ? 'tina-ccr-backup-' + hojeISO() + '.json' : nomeArquivo(lista[0].nome, lista[0].nascimento) + '.json');
   toast('Arquivo exportado. Guarde-o em local seguro (contém dados sensíveis).', 'ok');
 }
 function importar(file) {
@@ -1175,7 +1208,10 @@ function init() {
   carregar();
   $('btn-iniciar').addEventListener('click', iniciar);
   $('btn-home').addEventListener('click', irParaInicio);
-  document.querySelectorAll('[data-goto]').forEach((b) => b.addEventListener('click', () => trocarAba(b.dataset.goto, true)));
+  document.querySelectorAll('[data-goto]').forEach((b) => b.addEventListener('click', () => {
+    trocarAba(b.dataset.goto, true);
+    if (b.dataset.goto === 'cadastro') setTimeout(() => $('card-pacientes').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }), 50);
+  }));
   document.querySelectorAll('.tab-btn').forEach((b) => b.addEventListener('click', () => trocarAba(b.dataset.tab)));
   $('tab-btn-cadastro').parentElement.addEventListener('keydown', (e) => {   // navegação por setas (padrão WAI-ARIA)
     const i = TABS.indexOf(document.activeElement.dataset.tab); if (i < 0) return;
